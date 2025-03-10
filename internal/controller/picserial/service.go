@@ -22,7 +22,8 @@ func (cfg *Config) Validate() error {
 }
 
 type Handlers struct {
-	SyncStateHandler *handler.SyncStateHandler
+	SyncStateHandler  *handler.SyncStateHandler
+	CommandACKHandler *handler.CommandACKHandler
 }
 
 //nolint:revive
@@ -37,21 +38,17 @@ type PICSerialService struct {
 
 type CleanupFunc func(context.Context) error
 
-func NewPICSerialService(cfg Config, service service.Service) (*PICSerialService, error) {
-	serialClient, err := serial.NewClient(cfg.Serial)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create serial client: %w", err)
-	}
-
+func NewPICSerialService(cfg Config, client serial.Client, service service.Service, log *slog.Logger) (*PICSerialService, error) {
 	handlers := Handlers{
-		SyncStateHandler: handler.NewSyncStateHandler(service.RobotService()),
+		SyncStateHandler:  handler.NewSyncStateHandler(service.RobotService(), log),
+		CommandACKHandler: handler.NewCommandACKHandler(service.PICService(), log),
 	}
 
 	return &PICSerialService{
 		cfg:          cfg,
-		serialClient: serialClient,
+		serialClient: client,
 		handlers:     handlers,
-		log:          slog.With(slog.String("service", "PICSerialService")),
+		log:          log.With(slog.String("service", "PICSerialService")),
 	}, nil
 }
 
@@ -62,11 +59,6 @@ func (s *PICSerialService) Run(ctx context.Context) (CleanupFunc, error) {
 	go s.readLoop(ctx)
 
 	cleanup := func(_ context.Context) error {
-		s.log.Debug("PIC serial service is shutting down")
-		if err := s.serialClient.Stop(); err != nil {
-			s.log.Error("failed to stop serial client", "error", err)
-			return err
-		}
 		s.log.Debug("PIC serial service shut down complete")
 		return nil
 	}
@@ -107,6 +99,17 @@ func (s *PICSerialService) routeMessage(ctx context.Context, msg []byte) {
 			return
 		}
 		s.handlers.SyncStateHandler.Handle(ctx, syncStateMsg)
+
+	case messageTypeSyncStateACK:
+		var commandACKMsg handler.CommandACKMessage
+		if err := json.Unmarshal(msg, &commandACKMsg); err != nil {
+			s.log.Error("failed to unmarshal command ack message", slog.Any("error", err), slog.Any("message", msg))
+			return
+		}
+		s.handlers.CommandACKHandler.Handle(ctx, commandACKMsg)
+
+	default:
+		s.log.Error("unknown message type", slog.Any("type", temp.Type))
 	}
 }
 
@@ -123,6 +126,8 @@ func (m *messageType) UnmarshalJSON(data []byte) error {
 	switch n {
 	case 0:
 		*m = messageTypeSyncState
+	case 1:
+		*m = messageTypeSyncStateACK
 	default:
 		return fmt.Errorf("invalid message type: %s", string(data))
 	}
@@ -131,4 +136,5 @@ func (m *messageType) UnmarshalJSON(data []byte) error {
 
 const (
 	messageTypeSyncState messageType = iota
+	messageTypeSyncStateACK
 )

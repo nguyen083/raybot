@@ -59,17 +59,16 @@ type SyncStateHandler struct {
 	log          *slog.Logger
 }
 
-func NewSyncStateHandler(robotService service.RobotService) *SyncStateHandler {
+func NewSyncStateHandler(robotService service.RobotService, log *slog.Logger) *SyncStateHandler {
 	return &SyncStateHandler{
 		robotService: robotService,
-		log: slog.With(
-			slog.String("module", "pic"),
+		log: log.With(
 			slog.String("handler", "SyncStateHandler"),
 		),
 	}
 }
 
-func (h *SyncStateHandler) Handle(ctx context.Context, msg SyncStateMessage) {
+func (h SyncStateHandler) Handle(ctx context.Context, msg SyncStateMessage) {
 	params := service.UpdateRobotStateParams{}
 	switch msg.StateType {
 	case SyncStateTypeBattery:
