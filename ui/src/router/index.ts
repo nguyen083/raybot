@@ -17,6 +17,9 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         component: () => import('@/views/Home.vue'),
+        meta: {
+          title: 'Home',
+        },
       },
     ],
   },
@@ -26,7 +29,10 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        component: () => import('@/views/System.vue'),
+        component: () => import('@/views/system/SystemView.vue'),
+        meta: {
+          title: 'System',
+        },
       },
     ],
   },
@@ -45,7 +51,6 @@ router.beforeEach((to, _, next) => {
     title = `${to.meta.title} | ${title}`
   }
   document.title = title
-
   nprogress.start()
   next()
 })
