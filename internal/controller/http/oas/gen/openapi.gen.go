@@ -54,6 +54,12 @@ type HTTPConfig struct {
 	EnableSwagger bool `json:"enableSwagger"`
 }
 
+// HealthResponse defines model for HealthResponse.
+type HealthResponse struct {
+	// Status The health status
+	Status string `json:"status"`
+}
+
 // LogConfig defines model for LogConfig.
 type LogConfig struct {
 	// Level The log level for the gRPC server
@@ -113,17 +119,29 @@ type UpdateSystemConfigJSONRequestBody = SystemConfigRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get health status
+	// (GET /health)
+	GetHealth(w http.ResponseWriter, r *http.Request)
 	// Get system configuration
 	// (GET /system/config)
 	GetSystemConfig(w http.ResponseWriter, r *http.Request)
 	// Update system configuration
 	// (PUT /system/config)
 	UpdateSystemConfig(w http.ResponseWriter, r *http.Request)
+	// Restart the application
+	// (POST /system/restart)
+	RestartApplication(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// Get health status
+// (GET /health)
+func (_ Unimplemented) GetHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // Get system configuration
 // (GET /system/config)
@@ -137,6 +155,12 @@ func (_ Unimplemented) UpdateSystemConfig(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Restart the application
+// (POST /system/restart)
+func (_ Unimplemented) RestartApplication(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler            ServerInterface
@@ -145,6 +169,20 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetHealth operation middleware
+func (siw *ServerInterfaceWrapper) GetHealth(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetHealth(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // GetSystemConfig operation middleware
 func (siw *ServerInterfaceWrapper) GetSystemConfig(w http.ResponseWriter, r *http.Request) {
@@ -165,6 +203,20 @@ func (siw *ServerInterfaceWrapper) UpdateSystemConfig(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateSystemConfig(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RestartApplication operation middleware
+func (siw *ServerInterfaceWrapper) RestartApplication(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RestartApplication(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -288,13 +340,44 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/health", wrapper.GetHealth)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/system/config", wrapper.GetSystemConfig)
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/system/config", wrapper.UpdateSystemConfig)
 	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/system/restart", wrapper.RestartApplication)
+	})
 
 	return r
+}
+
+type GetHealthRequestObject struct {
+}
+
+type GetHealthResponseObject interface {
+	VisitGetHealthResponse(w http.ResponseWriter) error
+}
+
+type GetHealth200JSONResponse HealthResponse
+
+func (response GetHealth200JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetHealth400JSONResponse ErrorResponse
+
+func (response GetHealth400JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetSystemConfigRequestObject struct {
@@ -348,14 +431,44 @@ func (response UpdateSystemConfig400JSONResponse) VisitUpdateSystemConfigRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type RestartApplicationRequestObject struct {
+}
+
+type RestartApplicationResponseObject interface {
+	VisitRestartApplicationResponse(w http.ResponseWriter) error
+}
+
+type RestartApplication204Response struct {
+}
+
+func (response RestartApplication204Response) VisitRestartApplicationResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RestartApplication400JSONResponse ErrorResponse
+
+func (response RestartApplication400JSONResponse) VisitRestartApplicationResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Get health status
+	// (GET /health)
+	GetHealth(ctx context.Context, request GetHealthRequestObject) (GetHealthResponseObject, error)
 	// Get system configuration
 	// (GET /system/config)
 	GetSystemConfig(ctx context.Context, request GetSystemConfigRequestObject) (GetSystemConfigResponseObject, error)
 	// Update system configuration
 	// (PUT /system/config)
 	UpdateSystemConfig(ctx context.Context, request UpdateSystemConfigRequestObject) (UpdateSystemConfigResponseObject, error)
+	// Restart the application
+	// (POST /system/restart)
+	RestartApplication(ctx context.Context, request RestartApplicationRequestObject) (RestartApplicationResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -385,6 +498,30 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// GetHealth operation middleware
+func (sh *strictHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	var request GetHealthRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetHealth(ctx, request.(GetHealthRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetHealth")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetHealthResponseObject); ok {
+		if err := validResponse.VisitGetHealthResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // GetSystemConfig operation middleware
@@ -442,27 +579,53 @@ func (sh *strictHandler) UpdateSystemConfig(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// RestartApplication operation middleware
+func (sh *strictHandler) RestartApplication(w http.ResponseWriter, r *http.Request) {
+	var request RestartApplicationRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RestartApplication(ctx, request.(RestartApplicationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RestartApplication")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RestartApplicationResponseObject); ok {
+		if err := validResponse.VisitRestartApplicationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

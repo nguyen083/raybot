@@ -21,15 +21,18 @@ import { Loader } from 'lucide-vue-next'
 import { push } from 'notivue'
 import { useForm } from 'vee-validate'
 
-const props = defineProps<{ data: Ref<SystemConfig> }>()
+interface Props {
+  systemConfig: SystemConfig
+}
+const props = defineProps<Props>()
 const { mutate, isPending } = useMutationSystemConfig()
 
 const form = useForm({
   validationSchema: toTypedSchema(systemConfigSchema),
-  initialValues: props.data.value,
+  initialValues: props.systemConfig,
 })
 
-watch(() => props.data.value, (data) => {
+watch(() => props.systemConfig, (data) => {
   form.setValues(data)
 })
 

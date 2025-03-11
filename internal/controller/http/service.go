@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	httphandler "github.com/tbe-team/raybot/internal/controller/http/handler"
+	"github.com/tbe-team/raybot/internal/controller/http/middleware"
 	"github.com/tbe-team/raybot/internal/controller/http/oas/gen"
 	"github.com/tbe-team/raybot/internal/controller/http/swagger"
 	"github.com/tbe-team/raybot/internal/service"
@@ -50,6 +51,7 @@ func NewHTTPService(cfg Config, service service.Service, log *slog.Logger) (*HTT
 func (s HTTPService) Run() (CleanupFunc, error) {
 	r := chi.NewRouter()
 
+	s.registerMiddlewares(r)
 	if s.cfg.EnableSwagger {
 		s.registerSwaggerHandler(r)
 	}
@@ -100,6 +102,11 @@ func (s HTTPService) RegisterAPIHandlers(r chi.Router) {
 		},
 	)
 	gen.HandlerFromMuxWithBaseURL(strictAPIHandler, r, "/api/v1")
+}
+
+func (s HTTPService) registerMiddlewares(r chi.Router) {
+	r.Use(middleware.Logging)
+	r.Use(middleware.Recoverer)
 }
 
 func (s HTTPService) registerSwaggerHandler(r chi.Router) {

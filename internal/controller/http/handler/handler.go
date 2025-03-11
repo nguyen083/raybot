@@ -9,10 +9,12 @@ var _ gen.StrictServerInterface = (*APIHandler)(nil)
 
 type APIHandler struct {
 	*systemHandler
+	*healthHandler
 }
 
 func NewAPIHandler(service service.Service) *APIHandler {
 	return &APIHandler{
 		systemHandler: &systemHandler{systemService: service.SystemService()},
+		healthHandler: &healthHandler{},
 	}
 }
