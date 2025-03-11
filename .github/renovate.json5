@@ -21,14 +21,20 @@
       "matchPackageNames": ["tailwindcss"],
       "enabled": false
     },
+    // NPM: Automerge minor/patch, manual major
     {
       "matchManagers": ["npm"],
-      "matchPackageNames": ["!tailwindcss"],
-      "matchBaseBranches": ["main"],
-      "enabled": true,
-      "autoApprove": true,
-      "automerge": true
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "autoApprove": true
     },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "autoApprove": false
+    },
+    // GitHub Actions: Manual review
     {
       "matchManagers": ["github-actions"],
       "enabled": true,
