@@ -15,3 +15,5 @@ paths:
     $ref: "./paths/system@config.yml"
   /system/restart:
     $ref: "./paths/system@restart.yml"
+  /health:
+    $ref: "./paths/health.yml"

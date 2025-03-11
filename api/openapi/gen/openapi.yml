@@ -58,12 +58,32 @@ paths:
     post:
       summary: Restart the application
       operationId: restartApplication
-      description: Restart the application
+      description: Restart the application after 3 seconds.
       tags:
         - system
       responses:
         '204':
           description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /health:
+    get:
+      summary: Get health status
+      operationId: getHealth
+      description: Get the health status.
+      tags:
+        - health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
         '400':
           description: Bad Request
           content:
@@ -255,3 +275,13 @@ components:
         - grpc
         - http
         - pic
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+          description: The health status
+          x-order: 1
+      required:
+        - status
