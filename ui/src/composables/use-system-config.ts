@@ -7,22 +7,14 @@ const QUERY_KEY = 'systemConfig'
 export function useQuerySystemConfig() {
   return useQuery({
     queryKey: [QUERY_KEY],
-    queryFn: () => {
-      const result = system.getSystemConfig()
-      return result
-    },
+    queryFn: () => system.getSystemConfig(),
   })
 }
 export function useMutationSystemConfig() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (configData: SystemConfig) => {
-      const updatedConfig = system.updateSystemConfig(configData)
-      return updatedConfig
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
-    },
+    mutationFn: (configData: SystemConfig) => system.updateSystemConfig(configData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),
   })
 }

@@ -1,33 +1,34 @@
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 type SerialParity = 'none' | 'even' | 'odd'
 type LogFormat = 'json' | 'text'
-
-interface Grpc {
+type SerialDataBits = 5 | 6 | 7 | 8
+type SerialStopBits = 1 | 1.5 | 2
+interface GrpcConfig {
   port: number
 }
-interface Http {
+interface HttpConfig {
   port: number
   enableSwagger: boolean
 }
-interface Log {
+interface LogConfig {
   level: LogLevel
   format: LogFormat
   addSource: boolean
 }
-interface Serial {
+interface SerialConfig {
   port: string
   baudRate: number
-  dataBits: number
-  stopBits: number
+  dataBits: SerialDataBits
+  stopBits: SerialStopBits
   parity: SerialParity
   readTimeout: number
 }
-interface Pic {
-  serial: Serial
+interface PicConfig {
+  serial: SerialConfig
 }
 export interface SystemConfig {
-  grpc: Grpc
-  http: Http
-  log: Log
-  pic: Pic
+  grpc: GrpcConfig
+  http: HttpConfig
+  log: LogConfig
+  pic: PicConfig
 }
