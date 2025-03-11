@@ -86,13 +86,9 @@ const onSubmit = form.handleSubmit((values) => {
       <CardDescription>Adjust the robot parameters below</CardDescription>
     </CardHeader>
     <CardContent class="space-y-4">
-      <!-- grpc config -->
       <GrpcCollapsible />
-      <!-- http config -->
       <HttpCollapsible />
-      <!-- log config -->
       <LogCollapsible />
-      <!-- pic config -->
       <PicCollapsible />
     </CardContent>
     <CardFooter class="flex justify-end">
