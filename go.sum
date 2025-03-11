@@ -1,9 +1,5 @@
-buf.build/gen/go/tbe-team/raybot-api/grpc/go v1.5.1-20250310071020-110e0b3e70b3.2 h1:ufOHw6qtlWvPAhD07l6UYYYeMS5HuMuJ1H+mHsl019Q=
-buf.build/gen/go/tbe-team/raybot-api/grpc/go v1.5.1-20250310071020-110e0b3e70b3.2/go.mod h1:ib6EuGiVGWKccl7vG5i3qxyMiLwVg7aO/y4S+QczL7g=
 buf.build/gen/go/tbe-team/raybot-api/grpc/go v1.5.1-20250310125418-04155442fda5.2 h1:PfVr2GtS1q/djxm4nAHKO24+E7RC0qLKIaGS1luDbmE=
 buf.build/gen/go/tbe-team/raybot-api/grpc/go v1.5.1-20250310125418-04155442fda5.2/go.mod h1:+RQZiWa1jJ8CQcQRi212KOUARm+LCTzktDsJiB6wanI=
-buf.build/gen/go/tbe-team/raybot-api/protocolbuffers/go v1.36.5-20250310071020-110e0b3e70b3.1 h1:KUH1OJaOTt8khxrV10hgEtCEYAwVcxtjHvIZP/b4xYM=
-buf.build/gen/go/tbe-team/raybot-api/protocolbuffers/go v1.36.5-20250310071020-110e0b3e70b3.1/go.mod h1:CbvzJ/DrkNm3U3YOWL7P0L49URI7n/ayFSA43eNUPg8=
 buf.build/gen/go/tbe-team/raybot-api/protocolbuffers/go v1.36.5-20250310125418-04155442fda5.1 h1:mhG811U9e4h0liMqeBazUbDPsD7tqosb8kuLq7sj/i4=
 buf.build/gen/go/tbe-team/raybot-api/protocolbuffers/go v1.36.5-20250310125418-04155442fda5.1/go.mod h1:CbvzJ/DrkNm3U3YOWL7P0L49URI7n/ayFSA43eNUPg8=
 github.com/creack/goselect v0.1.2 h1:2DNy14+JPjRBgPzAd1thbQp4BSIihxcBf0IXhQXDRa0=
@@ -88,8 +84,8 @@ go.opentelemetry.io/otel/sdk/metric v1.34.0 h1:5CeK9ujjbFVL5c1PhLuStg1wxA7vQv7ce
 go.opentelemetry.io/otel/sdk/metric v1.34.0/go.mod h1:jQ/r8Ze28zRKoNRdkjCZxfs6YvBTG1+YIqyFVFYec5w=
 go.opentelemetry.io/otel/trace v1.34.0 h1:+ouXS2V8Rd4hp4580a8q23bg0azF2nI8cqLYnC8mh/k=
 go.opentelemetry.io/otel/trace v1.34.0/go.mod h1:Svm7lSjQD7kG7KJ/MUHPVXSDGz2OX4h0M2jHBhmSfRE=
-golang.org/x/crypto v0.33.0 h1:IOBPskki6Lysi0lo9qQvbxiQ+FvsCC/YWOecCHAixus=
-golang.org/x/crypto v0.33.0/go.mod h1:bVdXmD7IV/4GdElGPozy6U7lWdRXA4qyRVGJV57uQ5M=
+golang.org/x/crypto v0.35.0 h1:b15kiHdrGCHrP6LvwaQ3c03kgNhhiMgvlhxHQhmg2Xs=
+golang.org/x/crypto v0.35.0/go.mod h1:dy7dXNW32cAb/6/PRuTNsix8T+vJAqvuIy5Bli/x0YQ=
 golang.org/x/net v0.35.0 h1:T5GQRQb2y08kTAByq9L4/bz8cipCdA8FbRTXewonqY8=
 golang.org/x/net v0.35.0/go.mod h1:EglIi67kWsHKlRzzVMUD93VMSWGFOMSZgxFjparz1Qk=
 golang.org/x/sys v0.30.0 h1:QjkSwP/36a20jFYWkSue1YwXzLmsV5Gfq7Eiy72C1uc=
