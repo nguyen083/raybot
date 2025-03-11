@@ -21,26 +21,20 @@ import { Loader } from 'lucide-vue-next'
 import { push } from 'notivue'
 import { useForm } from 'vee-validate'
 
-const props = defineProps({
-  data: {
-    type: Object as PropType<SystemConfig>,
-    required: true,
-  },
-})
-
-const systemConfigMutation = useMutationSystemConfig()
+const props = defineProps<{ data: Ref<SystemConfig> }>()
+const { mutate, isPending } = useMutationSystemConfig()
 
 const form = useForm({
   validationSchema: toTypedSchema(systemConfigSchema),
-  initialValues: toRaw(props.data),
+  initialValues: props.data.value,
 })
 
-watch(() => props.data, (data) => {
-  form.setValues(toRaw(data))
+watch(() => props.data.value, (data) => {
+  form.setValues(data)
 })
 
 const onSubmit = form.handleSubmit((values) => {
-  systemConfigMutation.mutate(values, {
+  mutate(values, {
     onSuccess: () => {
       push.success({ message: 'Update successful', title: 'Success!' })
     },
@@ -70,7 +64,7 @@ const onSubmit = form.handleSubmit((values) => {
     </CardContent>
     <CardFooter class="flex justify-end">
       <Button type="submit">
-        <Loader v-if="systemConfigMutation.isPending.value" class="w-4 h-4 animate-spin" />
+        <Loader v-if="isPending" class="w-4 h-4 animate-spin" />
         Save
       </Button>
     </CardFooter>

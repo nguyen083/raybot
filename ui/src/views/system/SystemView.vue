@@ -18,7 +18,7 @@ const { isPending, data, isError, error } = useQuerySystemConfig()
       System Config Not Found
     </div>
     <div v-else class="flex justify-center w-full">
-      <SystemConfigForm class="w-2/3" :data="data" />
+      <SystemConfigForm class="w-2/3" :data="toRef(data)" />
     </div>
   </div>
 </template>
