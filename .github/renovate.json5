@@ -35,20 +35,6 @@
       "matchUpdateTypes": ["major", "minor", "patch"],
       "autoApprove": false,
       "automerge": false
-    },
-    {
-      "groupName": "{{packageName}}",
-      "enabled": true,
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
-      "autoApprove": true
-    },
-    {
-      "groupName": "{{packageName}}",
-      "enabled": true,
-      "matchUpdateTypes": ["major"],
-      "automerge": false,
-      "autoApprove": false
     }
   ],
   "digest": {
