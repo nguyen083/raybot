@@ -9,6 +9,5 @@ useColorMode()
   <Notivue v-slot="item">
     <Notification :item="item" />
   </Notivue>
-
   <RouterView />
 </template>
