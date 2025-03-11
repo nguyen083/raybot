@@ -1,0 +1,74 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "prHourlyLimit": 4,
+  "baseBranches": [
+    "main"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["go", "toolchain"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["tailwindcss"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["!tailwindcss"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "autoApprove": true,
+      "automerge": true
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "enabled": true,
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "autoApprove": false,
+      "automerge": false
+    },
+    {
+      "groupName": "{{packageName}}",
+      "enabled": true,
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "autoApprove": true
+    },
+    {
+      "groupName": "{{packageName}}",
+      "enabled": true,
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "autoApprove": false
+    }
+  ],
+  "digest": {
+    "enabled": false
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": [
+      "area/security"
+    ],
+    "automerge": false,
+    "autoApprove": false
+  },
+  "osvVulnerabilityAlerts": true,
+  "prConcurrentLimit": 15,
+  "rebaseWhen": "auto",
+  "branchPrefix": "deps-update/",
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "semanticCommitType": "fix",
+  "semanticCommitScope": "deps"
+}

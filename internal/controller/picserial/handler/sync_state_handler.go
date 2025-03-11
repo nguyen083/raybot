@@ -59,17 +59,16 @@ type SyncStateHandler struct {
 	log          *slog.Logger
 }
 
-func NewSyncStateHandler(robotService service.RobotService) *SyncStateHandler {
+func NewSyncStateHandler(robotService service.RobotService, log *slog.Logger) *SyncStateHandler {
 	return &SyncStateHandler{
 		robotService: robotService,
-		log: slog.With(
-			slog.String("module", "pic"),
+		log: log.With(
 			slog.String("handler", "SyncStateHandler"),
 		),
 	}
 }
 
-func (h *SyncStateHandler) Handle(ctx context.Context, msg SyncStateMessage) {
+func (h SyncStateHandler) Handle(ctx context.Context, msg SyncStateMessage) {
 	params := service.UpdateRobotStateParams{}
 	switch msg.StateType {
 	case SyncStateTypeBattery:
@@ -81,7 +80,6 @@ func (h *SyncStateHandler) Handle(ctx context.Context, msg SyncStateMessage) {
 			Percent      uint8    `json:"percent"`
 			Fault        uint8    `json:"fault"`
 			Health       uint8    `json:"health"`
-			Status       uint8    `json:"status"`
 		}
 		if err := json.Unmarshal(msg.Data, &temp); err != nil {
 			h.log.Error("failed to unmarshal battery data", slog.Any("error", err), slog.Any("data", msg.Data))
@@ -97,7 +95,6 @@ func (h *SyncStateHandler) Handle(ctx context.Context, msg SyncStateMessage) {
 			Percent:      temp.Percent,
 			Fault:        temp.Fault,
 			Health:       temp.Health,
-			Status:       temp.Status,
 		}
 
 	case SyncStateTypeCharge:
