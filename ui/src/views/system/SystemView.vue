@@ -3,7 +3,7 @@ import { useQuerySystemConfig } from '@/composables/use-system-config'
 import { SystemConfigForm } from '@/views/system/components/system-config-form'
 import { Loader } from 'lucide-vue-next'
 
-const { isPending, data, isError } = useQuerySystemConfig()
+const { isPending, data, isError, error } = useQuerySystemConfig()
 </script>
 
 <template>
@@ -12,10 +12,10 @@ const { isPending, data, isError } = useQuerySystemConfig()
       <Loader class="animate-spin" /> Loading
     </div>
     <div v-else-if="isError" class="pt-20 text-2xl">
-      Error
+      Error: {{ error }}
     </div>
     <div v-else-if="!data" class="pt-20 text-2xl">
-      No find data
+      System Config Not Found
     </div>
     <div v-else class="flex justify-center w-full">
       <SystemConfigForm class="w-2/3" :data="data" />

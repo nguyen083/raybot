@@ -15,11 +15,11 @@ import GrpcCollapsible from '@/views/system/components/system-config-form/GrpcCo
 import HttpCollapsible from '@/views/system/components/system-config-form/HttpCollapsible.vue'
 import LogCollapsible from '@/views/system/components/system-config-form/LogCollapsible.vue'
 import PicCollapsible from '@/views/system/components/system-config-form/PicCollapsible.vue'
+import { systemConfigSchema } from '@/views/system/components/system-config-form/shema'
 import { toTypedSchema } from '@vee-validate/zod'
 import { Loader } from 'lucide-vue-next'
 import { push } from 'notivue'
 import { useForm } from 'vee-validate'
-import { systemConfigSchema } from './system-config-shema'
 
 const props = defineProps({
   data: {
