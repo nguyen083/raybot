@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "prHourlyLimit": 4,
+  "digest": {
+    "enabled": false
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": [
+      "area/security"
+    ],
+    "automerge": false,
+    "autoApprove": false
+  },
+  "osvVulnerabilityAlerts": true,
+  "prConcurrentLimit": 15,
+  "rebaseWhen": "auto",
+  "branchPrefix": "deps-update/",
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "semanticCommitType": "fix",
+  "semanticCommitScope": "deps"
+}
