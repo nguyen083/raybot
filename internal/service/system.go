@@ -52,4 +52,7 @@ type UpdateSystemConfigOutput = GetSystemConfigOutput
 type SystemService interface {
 	GetSystemConfig(ctx context.Context) (GetSystemConfigOutput, error)
 	UpdateSystemConfig(ctx context.Context, params UpdateSystemConfigParams) (UpdateSystemConfigOutput, error)
+
+	// RestartApplication restarts the application after 3 second.
+	RestartApplication(ctx context.Context) error
 }
