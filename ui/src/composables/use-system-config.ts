@@ -1,7 +1,6 @@
-import type { ConfigJSON } from '@/api/config'
-import config from '@/api/config'
+import type { SystemConfig } from '@/types/system-config'
+import system from '@/api/system'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import nProgress from 'nprogress'
 
 const QUERY_KEY = 'systemConfig'
 
@@ -9,9 +8,7 @@ export function useQuerySystemConfig() {
   return useQuery({
     queryKey: [QUERY_KEY],
     queryFn: () => {
-      nProgress.start()
-      const result = config.get()
-      nProgress.done()
+      const result = system.getSystemConfig()
       return result
     },
   })
@@ -19,21 +16,13 @@ export function useQuerySystemConfig() {
 export function useMutationSystemConfig() {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation({
-    mutationFn: async (configData: ConfigJSON) => {
-      try {
-        nProgress.start()
-        const updatedConfig = await config.set(configData)
-        return updatedConfig
-      }
-      finally {
-        nProgress.done()
-      }
+  return useMutation({
+    mutationFn: (configData: SystemConfig) => {
+      const updatedConfig = system.updateSystemConfig(configData)
+      return updatedConfig
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     },
   })
-
-  return mutation
 }
