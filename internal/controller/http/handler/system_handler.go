@@ -55,3 +55,11 @@ func (h systemHandler) UpdateSystemConfig(ctx context.Context, request gen.Updat
 
 	return gen.UpdateSystemConfig200JSONResponse(converter.ToSystemConfigResponse(cfg)), nil
 }
+
+func (h systemHandler) RestartApplication(ctx context.Context, _ gen.RestartApplicationRequestObject) (gen.RestartApplicationResponseObject, error) {
+	if err := h.systemService.RestartApplication(ctx); err != nil {
+		return nil, fmt.Errorf("system service restart application: %w", err)
+	}
+
+	return gen.RestartApplication204Response{}, nil
+}

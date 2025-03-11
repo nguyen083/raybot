@@ -4,6 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
+	"os/exec"
+	"syscall"
+	"time"
 
 	"github.com/tbe-team/raybot/internal/config"
 	"github.com/tbe-team/raybot/internal/service"
@@ -59,6 +64,31 @@ func (s SystemService) UpdateSystemConfig(_ context.Context, params service.Upda
 	}
 
 	return configToUpdateSystemConfigOutput(cfg), nil
+}
+
+func (s SystemService) RestartApplication(_ context.Context) error {
+	go func() {
+		time.Sleep(3 * time.Second)
+
+		self, err := os.Executable()
+		if err != nil {
+			slog.Error("failed to restart application", slog.Any("error", err))
+		}
+
+		cmd := exec.Command(self, os.Args[1:]...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		cmd.Env = os.Environ()
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		if err := cmd.Run(); err != nil {
+			slog.Error("failed to restart application", slog.Any("error", err))
+		}
+
+		os.Exit(0)
+	}()
+
+	return nil
 }
 
 func configToUpdateSystemConfigOutput(cfg config.Config) service.UpdateSystemConfigOutput {

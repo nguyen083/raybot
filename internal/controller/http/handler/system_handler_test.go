@@ -331,4 +331,64 @@ func TestSystemHandler(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("test restart application", func(t *testing.T) {
+		tests := []struct {
+			name           string
+			mockSystemSvc  func(_ *mocks.FakeSystemService)
+			expectedStatus int
+		}{
+			{
+				name: "successful restart",
+				mockSystemSvc: func(svc *mocks.FakeSystemService) {
+					svc.EXPECT().
+						RestartApplication(context.Background()).
+						Return(nil)
+				},
+				expectedStatus: http.StatusNoContent,
+			},
+			{
+				name: "restart error",
+				mockSystemSvc: func(svc *mocks.FakeSystemService) {
+					svc.EXPECT().
+						RestartApplication(context.Background()).
+						Return(assert.AnError)
+				},
+				expectedStatus: http.StatusInternalServerError,
+			},
+		}
+
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				// Setup
+				systemSvc := mocks.NewFakeSystemService(t)
+				tc.mockSystemSvc(systemSvc)
+
+				handler := systemHandler{
+					systemService: systemSvc,
+				}
+
+				// Create a new request
+				req := httptest.NewRequest("POST", "/system/restart", nil)
+				rec := httptest.NewRecorder()
+
+				// Call the method directly
+				result, err := handler.RestartApplication(req.Context(), gen.RestartApplicationRequestObject{})
+
+				// Process the result to simulate middleware behavior
+				if err != nil {
+					rec.WriteHeader(http.StatusInternalServerError)
+					if _, err := rec.Write([]byte(err.Error())); err != nil {
+						assert.Fail(t, "failed to write response body")
+					}
+				} else if _, ok := result.(gen.RestartApplication204Response); ok {
+					rec.WriteHeader(http.StatusNoContent)
+				}
+
+				// Assertions
+				assert.Equal(t, tc.expectedStatus, rec.Code)
+				systemSvc.AssertExpectations(t)
+			})
+		}
+	})
 }
