@@ -55,21 +55,24 @@ const onSubmit = form.handleSubmit((values) => {
 
 <template>
   <form @submit="onSubmit">
-    <CardHeader>
-      <CardTitle>System config</CardTitle>
-      <CardDescription>Adjust the robot parameters below</CardDescription>
-    </CardHeader>
-    <CardContent class="space-y-4">
-      <GrpcCollapsible />
-      <HttpCollapsible />
-      <LogCollapsible />
-      <PicCollapsible />
-    </CardContent>
-    <CardFooter class="flex justify-end">
-      <Button type="submit">
+    <CardHeader class="flex flex-row items-center justify-between">
+      <div class="space-y-2">
+        <CardTitle>System config</CardTitle>
+        <CardDescription>Adjust the robot parameters below</CardDescription>
+      </div>
+      <Button type="submit" class="w-fit">
         <Loader v-if="isPending" class="w-4 h-4 animate-spin" />
         Save
       </Button>
-    </CardFooter>
+    </CardHeader>
+    <CardContent class="grid grid-cols-2 gap-4">
+      <div class="space-y-4 ">
+        <GrpcCollapsible />
+        <HttpCollapsible />
+        <LogCollapsible />
+      </div>
+
+      <PicCollapsible />
+    </CardContent>
   </form>
 </template>
