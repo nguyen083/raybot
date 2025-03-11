@@ -7,6 +7,50 @@
     "dependencies"
   ],
   "prHourlyLimit": 4,
+  "baseBranches": [
+    "main"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["go", "toolchain"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["pnpm"],
+      "matchPackageNames": ["tailwindcss"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["pnpm"],
+      "matchPackageNames": ["!tailwindcss"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "autoApprove": true,
+      "automerge": true
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "enabled": true,
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "autoApprove": false,
+      "automerge": false
+    },
+    {
+      "groupName": "{{packageName}}",
+      "enabled": true,
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "autoApprove": true
+    },
+    {
+      "groupName": "{{packageName}}",
+      "enabled": true,
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "autoApprove": false
+    }
+  ],
   "digest": {
     "enabled": false
   },
