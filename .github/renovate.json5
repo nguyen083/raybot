@@ -17,12 +17,12 @@
       "enabled": false
     },
     {
-      "matchManagers": ["pnpm"],
+      "matchManagers": ["npm"],
       "matchPackageNames": ["tailwindcss"],
       "enabled": false
     },
     {
-      "matchManagers": ["pnpm"],
+      "matchManagers": ["npm"],
       "matchPackageNames": ["!tailwindcss"],
       "matchBaseBranches": ["main"],
       "enabled": true,
