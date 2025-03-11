@@ -54,6 +54,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /system/restart:
+    post:
+      summary: Restart the application
+      operationId: restartApplication
+      description: Restart the application
+      tags:
+        - system
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     LogConfig:

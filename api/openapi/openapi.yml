@@ -13,3 +13,5 @@ security: []
 paths:
   /system/config:
     $ref: "./paths/system@config.yml"
+  /system/restart:
+    $ref: "./paths/system@restart.yml"
