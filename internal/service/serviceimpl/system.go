@@ -43,7 +43,6 @@ func (s SystemService) UpdateSystemConfig(_ context.Context, params service.Upda
 
 	cfg.GRPC.Port = params.GRPCConfig.Port
 
-	cfg.HTTP.Port = params.HTTPConfig.Port
 	cfg.HTTP.EnableSwagger = params.HTTPConfig.EnableSwagger
 
 	cfg.PIC.Serial.Port = params.PICConfig.Serial.Port
@@ -80,8 +79,10 @@ func (s SystemService) RestartApplication(_ context.Context) error {
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		cmd.Env = os.Environ()
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-		if err := cmd.Run(); err != nil {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Setpgid: true,
+		}
+		if err := cmd.Start(); err != nil {
 			slog.Error("failed to restart application", slog.Any("error", err))
 		}
 
@@ -102,7 +103,6 @@ func configToUpdateSystemConfigOutput(cfg config.Config) service.UpdateSystemCon
 			Port: cfg.GRPC.Port,
 		},
 		HTTPConfig: service.HTTPConfig{
-			Port:          cfg.HTTP.Port,
 			EnableSwagger: cfg.HTTP.EnableSwagger,
 		},
 		PICConfig: service.PICConfig{

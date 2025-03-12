@@ -8,20 +8,7 @@ const MainLayout = () => import('@/layouts/main-layout/MainLayout.vue')
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/home',
-  },
-  {
-    path: '/home',
-    component: MainLayout,
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/Home.vue'),
-        meta: {
-          title: 'Home',
-        },
-      },
-    ],
+    redirect: '/system',
   },
   {
     path: '/system',
@@ -29,12 +16,23 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        component: () => import('@/views/system/SystemView.vue'),
+        component: () => import('@/views/system/ConfigurationView.vue'),
         meta: {
-          title: 'System',
+          title: 'System Configuration',
+        },
+      },
+      {
+        path: 'restart',
+        component: () => import('@/views/system/RestartView.vue'),
+        meta: {
+          title: 'System Restart',
         },
       },
     ],
+  },
+  {
+    path: '/404',
+    component: () => import('@/views/NotFoundView.vue'),
   },
 ]
 
@@ -46,7 +44,7 @@ const router = createRouter({
 const nprogress = useNProgress()
 
 router.beforeEach((to, _, next) => {
-  let title = import.meta.env.VITE_APP_NAME
+  let title = 'Raybot UI'
   if (to.meta.title) {
     title = `${to.meta.title} | ${title}`
   }
