@@ -5,7 +5,6 @@ export const systemConfigSchema = z.object({
     port: z.number().int().min(1).max(65535),
   }),
   http: z.object({
-    port: z.number().int().min(0).max(65535),
     enableSwagger: z.boolean(),
   }),
   log: z.object({
