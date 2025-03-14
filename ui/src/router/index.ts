@@ -8,7 +8,18 @@ const MainLayout = () => import('@/layouts/main-layout/MainLayout.vue')
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/system',
+    redirect: '/state',
+  },
+  {
+    path: '/state',
+    component: MainLayout,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/state/StateView.vue'),
+        meta: { title: 'State' },
+      },
+    ],
   },
   {
     path: '/system',
@@ -16,17 +27,17 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
+        redirect: '/system/configuration',
+      },
+      {
+        path: 'configuration',
         component: () => import('@/views/system/ConfigurationView.vue'),
-        meta: {
-          title: 'System Configuration',
-        },
+        meta: { title: 'System Configuration' },
       },
       {
         path: 'restart',
         component: () => import('@/views/system/RestartView.vue'),
-        meta: {
-          title: 'System Restart',
-        },
+        meta: { title: 'System Restart' },
       },
     ],
   },

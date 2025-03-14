@@ -23,7 +23,7 @@ const { isPending, data, isError, error } = useQuerySystemConfig()
       <Card class="flex flex-col items-center gap-4 p-6 text-destructive">
         <AlertCircle class="w-8 h-8" />
         <div class="space-y-2 text-center">
-          <h2 class="text-lg font-semibold">
+          <h2 class="text-lg font-medium">
             Failed to load configuration
           </h2>
           <p class="text-sm text-muted-foreground">
@@ -37,7 +37,7 @@ const { isPending, data, isError, error } = useQuerySystemConfig()
       <Card class="flex flex-col items-center gap-4 p-6">
         <AlertCircle class="w-8 h-8 text-muted-foreground" />
         <div class="space-y-2 text-center">
-          <h2 class="text-lg font-semibold">
+          <h2 class="text-lg font-medium">
             No Configuration Found
           </h2>
           <p class="text-sm text-muted-foreground">
@@ -47,7 +47,7 @@ const { isPending, data, isError, error } = useQuerySystemConfig()
       </Card>
     </div>
 
-    <div v-else class="flex flex-col w-full gap-4">
+    <div v-else class="flex flex-col w-full">
       <SystemConfigForm :system-config="data" />
     </div>
   </PageContainer>
