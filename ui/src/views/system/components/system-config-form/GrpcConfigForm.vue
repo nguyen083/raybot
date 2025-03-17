@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 </script>
 
@@ -31,6 +32,19 @@ import { Switch } from '@/components/ui/switch'
             <FormMessage />
           </FormItem>
         </FormField>
+        <div class="space-y-2">
+          <FormField v-slot="{ componentField }" name="grpc.cloud.address">
+            <FormItem>
+              <FormLabel>Cloud Address</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
       </div>
     </CardContent>
   </Card>

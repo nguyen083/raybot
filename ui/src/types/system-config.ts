@@ -7,9 +7,13 @@ type SerialStopBits = 1 | 1.5 | 2
 interface GrpcServerConfig {
   enable: boolean
 }
+interface GrpcCloudConfig {
+  address: string
+}
 
 interface GrpcConfig {
   server: GrpcServerConfig
+  cloud: GrpcCloudConfig
 }
 
 interface HttpConfig {

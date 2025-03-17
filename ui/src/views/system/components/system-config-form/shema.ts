@@ -5,6 +5,9 @@ export const systemConfigSchema = z.object({
     server: z.object({
       enable: z.boolean(),
     }),
+    cloud: z.object({
+      address: z.string(),
+    }),
   }),
   http: z.object({
     enableSwagger: z.boolean(),
