@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 </script>
 
 <template>
@@ -16,15 +16,18 @@ import { Input } from '@/components/ui/input'
     </CardHeader>
     <CardContent class="space-y-4">
       <div class="space-y-2">
-        <FormField v-slot="{ componentField }" name="grpc.port">
+        <FormField v-slot="{ value, handleChange }" name="grpc.server.enable">
           <FormItem>
-            <FormLabel>Port</FormLabel>
-            <FormControl>
-              <Input
-                v-bind="componentField"
-                type="number"
-              />
-            </FormControl>
+            <div class="flex items-center space-x-2">
+              <FormLabel>Enable Server</FormLabel>
+              <FormControl>
+                <Switch
+                  class="!mt-0"
+                  :model-value="value"
+                  @update:model-value="handleChange"
+                />
+              </FormControl>
+            </div>
             <FormMessage />
           </FormItem>
         </FormField>

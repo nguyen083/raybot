@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import type { SystemConfig } from '@/types/system-config'
 import { Button } from '@/components/ui/button'
-import {
-  CardDescription,
-  CardTitle,
-} from '@/components/ui/card'
 import { useMutationSystemConfig } from '@/composables/use-system'
 import { HTTPError, RaybotError } from '@/types/error'
 import GrpcConfigForm from '@/views/system/components/system-config-form/GrpcConfigForm.vue'

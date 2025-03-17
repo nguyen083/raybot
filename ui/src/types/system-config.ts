@@ -4,8 +4,12 @@ type LogFormat = 'json' | 'text'
 type SerialDataBits = 5 | 6 | 7 | 8
 type SerialStopBits = 1 | 1.5 | 2
 
+interface GrpcServerConfig {
+  enable: boolean
+}
+
 interface GrpcConfig {
-  port: number
+  server: GrpcServerConfig
 }
 
 interface HttpConfig {
