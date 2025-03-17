@@ -2,7 +2,12 @@ import * as z from 'zod'
 
 export const systemConfigSchema = z.object({
   grpc: z.object({
-    port: z.number().int().min(1).max(65535),
+    server: z.object({
+      enable: z.boolean(),
+    }),
+    cloud: z.object({
+      address: z.string(),
+    }),
   }),
   http: z.object({
     enableSwagger: z.boolean(),
