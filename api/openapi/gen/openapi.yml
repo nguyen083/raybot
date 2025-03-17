@@ -144,16 +144,36 @@ components:
         - level
         - format
         - addSource
+    GRPCServerConfig:
+      type: object
+      properties:
+        enable:
+          type: boolean
+          example: true
+          description: Whether to enable the gRPC server
+          x-order: 1
+      required:
+        - enable
+    CloudConfig:
+      type: object
+      properties:
+        address:
+          type: string
+          example: localhost:50051
+          description: The address for the cloud service
+          x-order: 1
+      required:
+        - address
     GRPCConfig:
       type: object
       properties:
-        port:
-          type: integer
-          example: 50051
-          description: The port number for the gRPC server
-          x-order: 1
+        server:
+          $ref: '#/components/schemas/GRPCServerConfig'
+        cloud:
+          $ref: '#/components/schemas/CloudConfig'
       required:
-        - port
+        - server
+        - cloud
     HTTPConfig:
       type: object
       properties:
