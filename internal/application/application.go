@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/tbe-team/raybot/internal/config"
 	"github.com/tbe-team/raybot/internal/controller/picserial/serial"
@@ -37,8 +36,6 @@ func (a *Application) Context() context.Context {
 type CleanupFunc func() error
 
 func New() (*Application, CleanupFunc, error) {
-	// Set UTC timezone
-	time.Local = time.UTC
 	// Create context
 	ctx := context.Background()
 
@@ -83,7 +80,7 @@ func New() (*Application, CleanupFunc, error) {
 
 	// Setup service
 	validator := validator.New()
-	service := serviceimpl.New(cfgManager, picSerialClient, repo, dbProvider, validator)
+	service := serviceimpl.New(cfgManager, picSerialClient, repo, dbProvider, validator, logger)
 
 	// Setup application
 	app := &Application{
