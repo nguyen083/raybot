@@ -6,7 +6,6 @@ import { useQueryRobotState } from '@/composables/use-robot-state'
 import { formatDate } from '@/lib/date'
 
 import { AlertCircle, Loader } from 'lucide-vue-next'
-import InProgressCommandCard from './InProgressCommandCard.vue'
 
 const REFRESH_INTERVAL = 1000
 const refetchInterval = ref(REFRESH_INTERVAL)
@@ -240,7 +239,6 @@ function getTemperatureColor(temp: number): string {
           </CardContent>
         </Card>
       </div>
-      <InProgressCommandCard :refetch-interval="refetchInterval" />
     </div>
   </PageContainer>
 </template>
