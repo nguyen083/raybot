@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
-	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 
@@ -17,31 +16,27 @@ import (
 	"github.com/tbe-team/raybot/internal/storage/db"
 )
 
-type CreateSerialCommandServicer interface {
-	CreateSerialCommand(ctx context.Context, params service.CreateSerialCommandParams) error
-}
-
 type MoveToLocationExecutor struct {
-	commandRepo          repository.CommandRepository
-	subscriber           message.Subscriber
-	createSerialServicer CreateSerialCommandServicer
-	dbProvider           db.Provider
-	log                  *slog.Logger
+	commandRepo repository.CommandRepository
+	subscriber  message.Subscriber
+	picService  service.PICService
+	dbProvider  db.Provider
+	log         *slog.Logger
 }
 
 func NewMoveToLocationExecutor(
 	commandRepo repository.CommandRepository,
 	subscriber message.Subscriber,
-	createSerialCommander CreateSerialCommandServicer,
+	createSerialCommander service.PICService,
 	dbProvider db.Provider,
 	log *slog.Logger,
 ) *MoveToLocationExecutor {
 	return &MoveToLocationExecutor{
-		commandRepo:          commandRepo,
-		subscriber:           subscriber,
-		createSerialServicer: createSerialCommander,
-		dbProvider:           dbProvider,
-		log:                  log,
+		commandRepo: commandRepo,
+		subscriber:  subscriber,
+		picService:  createSerialCommander,
+		dbProvider:  dbProvider,
+		log:         log,
 	}
 }
 
@@ -62,7 +57,7 @@ func (e MoveToLocationExecutor) Execute(ctx context.Context, command model.Comma
 	wg := sync.WaitGroup{}
 	errChan := make(chan error)
 	wg.Add(1)
-	go e.trackingLocationLoop(execCtx, &wg, errChan, command, inputs.Location)
+	go e.trackingLocationLoop(execCtx, &wg, errChan, inputs.Location)
 
 	// Create serial command, robot move forward with speed 100
 	params := service.CreateSerialCommandParams{
@@ -72,10 +67,9 @@ func (e MoveToLocationExecutor) Execute(ctx context.Context, command model.Comma
 			Enable:    true,
 		},
 	}
-	if err := e.createSerialServicer.CreateSerialCommand(ctx, params); err != nil {
+	if err := e.picService.CreateSerialCommand(ctx, params); err != nil {
 		// Create serial command failed, we need to cancel the tracking location loop
 		cancel()
-		e.log.Error("create serial command", slog.Any("error", err))
 		return fmt.Errorf("create serial command: %w", err)
 	}
 
@@ -91,7 +85,7 @@ func (e MoveToLocationExecutor) Execute(ctx context.Context, command model.Comma
 				Enable:    true,
 			},
 		}
-		if err := e.createSerialServicer.CreateSerialCommand(ctx, params); err != nil {
+		if err := e.picService.CreateSerialCommand(ctx, params); err != nil {
 			e.log.Error(
 				"robot move to location done but can not stop robot: can not create serial command",
 				slog.Any("error", err),
@@ -113,7 +107,6 @@ func (e MoveToLocationExecutor) trackingLocationLoop(
 	ctx context.Context,
 	wg *sync.WaitGroup,
 	errChan chan<- error,
-	command model.Command,
 	targetLocation string,
 ) {
 	defer func() {
@@ -131,29 +124,19 @@ func (e MoveToLocationExecutor) trackingLocationLoop(
 	for {
 		select {
 		case <-ctx.Done():
+			errChan <- ctx.Err()
 			return
 		case msg := <-msgChan:
 			var event pubsub.RobotLocationUpdatedEvent
 			if err := json.Unmarshal(msg.Payload, &event); err != nil {
-				e.log.Error("unmarshal location tracked event", slog.Any("error", err))
-				continue
+				errChan <- fmt.Errorf("unmarshal location tracked event: %w", err)
+				return
 			}
 
 			if event.Location == targetLocation {
 				e.log.Debug("current location is the same as the target location")
 
-				completedAt := time.Now()
-				params := repository.UpdateCommandParams{
-					ID:             command.ID,
-					Status:         model.CommandStatusSucceeded,
-					SetStatus:      true,
-					CompletedAt:    &completedAt,
-					SetCompletedAt: true,
-				}
-				if _, err := e.commandRepo.UpdateCommand(ctx, e.dbProvider.DB(), params); err != nil {
-					errChan <- fmt.Errorf("command repository update command: %w", err)
-				}
-
+				// command success, we just return without error
 				return
 			}
 

@@ -19,14 +19,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CommandService_CreateCommand_FullMethodName = "/command.v1.CommandService/CreateCommand"
+	CommandService_MoveToLocation_FullMethodName = "/command.v1.CommandService/MoveToLocation"
+	CommandService_LiftCargo_FullMethodName      = "/command.v1.CommandService/LiftCargo"
+	CommandService_DropCargo_FullMethodName      = "/command.v1.CommandService/DropCargo"
+	CommandService_OpenCargo_FullMethodName      = "/command.v1.CommandService/OpenCargo"
+	CommandService_CloseCargo_FullMethodName     = "/command.v1.CommandService/CloseCargo"
 )
 
 // CommandServiceClient is the client API for CommandService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommandServiceClient interface {
-	CreateCommand(ctx context.Context, in *CreateCommandRequest, opts ...grpc.CallOption) (*CreateCommandResponse, error)
+	MoveToLocation(ctx context.Context, in *MoveToLocationRequest, opts ...grpc.CallOption) (*MoveToLocationResponse, error)
+	LiftCargo(ctx context.Context, in *LiftCargoRequest, opts ...grpc.CallOption) (*LiftCargoResponse, error)
+	DropCargo(ctx context.Context, in *DropCargoRequest, opts ...grpc.CallOption) (*DropCargoResponse, error)
+	OpenCargo(ctx context.Context, in *OpenCargoRequest, opts ...grpc.CallOption) (*OpenCargoResponse, error)
+	CloseCargo(ctx context.Context, in *CloseCargoRequest, opts ...grpc.CallOption) (*CloseCargoResponse, error)
 }
 
 type commandServiceClient struct {
@@ -37,10 +45,50 @@ func NewCommandServiceClient(cc grpc.ClientConnInterface) CommandServiceClient {
 	return &commandServiceClient{cc}
 }
 
-func (c *commandServiceClient) CreateCommand(ctx context.Context, in *CreateCommandRequest, opts ...grpc.CallOption) (*CreateCommandResponse, error) {
+func (c *commandServiceClient) MoveToLocation(ctx context.Context, in *MoveToLocationRequest, opts ...grpc.CallOption) (*MoveToLocationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateCommandResponse)
-	err := c.cc.Invoke(ctx, CommandService_CreateCommand_FullMethodName, in, out, cOpts...)
+	out := new(MoveToLocationResponse)
+	err := c.cc.Invoke(ctx, CommandService_MoveToLocation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commandServiceClient) LiftCargo(ctx context.Context, in *LiftCargoRequest, opts ...grpc.CallOption) (*LiftCargoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LiftCargoResponse)
+	err := c.cc.Invoke(ctx, CommandService_LiftCargo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commandServiceClient) DropCargo(ctx context.Context, in *DropCargoRequest, opts ...grpc.CallOption) (*DropCargoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DropCargoResponse)
+	err := c.cc.Invoke(ctx, CommandService_DropCargo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commandServiceClient) OpenCargo(ctx context.Context, in *OpenCargoRequest, opts ...grpc.CallOption) (*OpenCargoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OpenCargoResponse)
+	err := c.cc.Invoke(ctx, CommandService_OpenCargo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commandServiceClient) CloseCargo(ctx context.Context, in *CloseCargoRequest, opts ...grpc.CallOption) (*CloseCargoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CloseCargoResponse)
+	err := c.cc.Invoke(ctx, CommandService_CloseCargo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +99,11 @@ func (c *commandServiceClient) CreateCommand(ctx context.Context, in *CreateComm
 // All implementations must embed UnimplementedCommandServiceServer
 // for forward compatibility.
 type CommandServiceServer interface {
-	CreateCommand(context.Context, *CreateCommandRequest) (*CreateCommandResponse, error)
+	MoveToLocation(context.Context, *MoveToLocationRequest) (*MoveToLocationResponse, error)
+	LiftCargo(context.Context, *LiftCargoRequest) (*LiftCargoResponse, error)
+	DropCargo(context.Context, *DropCargoRequest) (*DropCargoResponse, error)
+	OpenCargo(context.Context, *OpenCargoRequest) (*OpenCargoResponse, error)
+	CloseCargo(context.Context, *CloseCargoRequest) (*CloseCargoResponse, error)
 	mustEmbedUnimplementedCommandServiceServer()
 }
 
@@ -62,8 +114,20 @@ type CommandServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCommandServiceServer struct{}
 
-func (UnimplementedCommandServiceServer) CreateCommand(context.Context, *CreateCommandRequest) (*CreateCommandResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateCommand not implemented")
+func (UnimplementedCommandServiceServer) MoveToLocation(context.Context, *MoveToLocationRequest) (*MoveToLocationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveToLocation not implemented")
+}
+func (UnimplementedCommandServiceServer) LiftCargo(context.Context, *LiftCargoRequest) (*LiftCargoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LiftCargo not implemented")
+}
+func (UnimplementedCommandServiceServer) DropCargo(context.Context, *DropCargoRequest) (*DropCargoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropCargo not implemented")
+}
+func (UnimplementedCommandServiceServer) OpenCargo(context.Context, *OpenCargoRequest) (*OpenCargoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OpenCargo not implemented")
+}
+func (UnimplementedCommandServiceServer) CloseCargo(context.Context, *CloseCargoRequest) (*CloseCargoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CloseCargo not implemented")
 }
 func (UnimplementedCommandServiceServer) mustEmbedUnimplementedCommandServiceServer() {}
 func (UnimplementedCommandServiceServer) testEmbeddedByValue()                        {}
@@ -86,20 +150,92 @@ func RegisterCommandServiceServer(s grpc.ServiceRegistrar, srv CommandServiceSer
 	s.RegisterService(&CommandService_ServiceDesc, srv)
 }
 
-func _CommandService_CreateCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateCommandRequest)
+func _CommandService_MoveToLocation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveToLocationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CommandServiceServer).CreateCommand(ctx, in)
+		return srv.(CommandServiceServer).MoveToLocation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CommandService_CreateCommand_FullMethodName,
+		FullMethod: CommandService_MoveToLocation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommandServiceServer).CreateCommand(ctx, req.(*CreateCommandRequest))
+		return srv.(CommandServiceServer).MoveToLocation(ctx, req.(*MoveToLocationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommandService_LiftCargo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LiftCargoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommandServiceServer).LiftCargo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommandService_LiftCargo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommandServiceServer).LiftCargo(ctx, req.(*LiftCargoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommandService_DropCargo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropCargoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommandServiceServer).DropCargo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommandService_DropCargo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommandServiceServer).DropCargo(ctx, req.(*DropCargoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommandService_OpenCargo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OpenCargoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommandServiceServer).OpenCargo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommandService_OpenCargo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommandServiceServer).OpenCargo(ctx, req.(*OpenCargoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommandService_CloseCargo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseCargoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommandServiceServer).CloseCargo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommandService_CloseCargo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommandServiceServer).CloseCargo(ctx, req.(*CloseCargoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +248,24 @@ var CommandService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CommandServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateCommand",
-			Handler:    _CommandService_CreateCommand_Handler,
+			MethodName: "MoveToLocation",
+			Handler:    _CommandService_MoveToLocation_Handler,
+		},
+		{
+			MethodName: "LiftCargo",
+			Handler:    _CommandService_LiftCargo_Handler,
+		},
+		{
+			MethodName: "DropCargo",
+			Handler:    _CommandService_DropCargo_Handler,
+		},
+		{
+			MethodName: "OpenCargo",
+			Handler:    _CommandService_OpenCargo_Handler,
+		},
+		{
+			MethodName: "CloseCargo",
+			Handler:    _CommandService_CloseCargo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

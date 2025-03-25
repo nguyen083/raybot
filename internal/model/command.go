@@ -10,22 +10,28 @@ import (
 type CommandType uint16
 
 func (s CommandType) Validate() error {
-	switch s {
-	case CommandTypeMoveToLocation:
-		return nil
-	default:
+	if s < CommandTypeMoveToLocation || s > CommandTypeCloseCargo {
 		return fmt.Errorf("invalid command type: %d", s)
 	}
+	return nil
 }
 
 func (s CommandType) String() string {
 	return []string{
 		"MOVE_TO_LOCATION",
+		"LIFT_CARGO",
+		"DROP_CARGO",
+		"OPEN_CARGO",
+		"CLOSE_CARGO",
 	}[s]
 }
 
 const (
 	CommandTypeMoveToLocation CommandType = iota
+	CommandTypeLiftCargo
+	CommandTypeDropCargo
+	CommandTypeOpenCargo
+	CommandTypeCloseCargo
 )
 
 // CommandStatus represents the status of the command
@@ -99,6 +105,22 @@ type CommandMoveToLocationInputs struct {
 
 func (CommandMoveToLocationInputs) isCommandInputs() {}
 
+type CommandLiftCargoInputs struct{}
+
+func (CommandLiftCargoInputs) isCommandInputs() {}
+
+type CommandDropCargoInputs struct{}
+
+func (CommandDropCargoInputs) isCommandInputs() {}
+
+type CommandOpenCargoInputs struct{}
+
+func (CommandOpenCargoInputs) isCommandInputs() {}
+
+type CommandCloseCargoInputs struct{}
+
+func (CommandCloseCargoInputs) isCommandInputs() {}
+
 func UnmarshalCommandInputs(cmdType CommandType, data []byte) (CommandInputs, error) {
 	var inputs CommandInputs
 
@@ -109,6 +131,14 @@ func UnmarshalCommandInputs(cmdType CommandType, data []byte) (CommandInputs, er
 			return nil, fmt.Errorf("unmarshal move to location inputs: %w", err)
 		}
 		inputs = moveToLocationInputs
+	case CommandTypeLiftCargo:
+		inputs = CommandLiftCargoInputs{}
+	case CommandTypeDropCargo:
+		inputs = CommandDropCargoInputs{}
+	case CommandTypeOpenCargo:
+		inputs = CommandOpenCargoInputs{}
+	case CommandTypeCloseCargo:
+		inputs = CommandCloseCargoInputs{}
 	default:
 		return nil, fmt.Errorf("invalid command type: %d", cmdType)
 	}

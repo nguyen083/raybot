@@ -23,13 +23,10 @@ import (
 
 var ErrRobotIsProcessingCommand = xerror.Conflict(nil, "command.alreadyProcessing", "robot is already processing another command")
 
-type CreateSerialServicer interface {
-	CreateSerialCommand(ctx context.Context, params service.CreateSerialCommandParams) error
-}
-
 type Service struct {
 	commandRepo             repository.CommandRepository
-	createSerialServicer    CreateSerialServicer
+	picService              service.PICService
+	cargoControlService     service.CargoControlService
 	dbProvider              db.Provider
 	publisher               message.Publisher
 	subscriber              message.Subscriber
@@ -40,7 +37,8 @@ type Service struct {
 
 func NewService(
 	commandRepo repository.CommandRepository,
-	createSerialCommander CreateSerialServicer,
+	picService service.PICService,
+	cargoControlService service.CargoControlService,
 	dbProvider db.Provider,
 	publisher message.Publisher,
 	subscriber message.Subscriber,
@@ -49,7 +47,8 @@ func NewService(
 ) *Service {
 	service := &Service{
 		commandRepo:             commandRepo,
-		createSerialServicer:    createSerialCommander,
+		picService:              picService,
+		cargoControlService:     cargoControlService,
 		dbProvider:              dbProvider,
 		publisher:               publisher,
 		subscriber:              subscriber,
@@ -94,6 +93,22 @@ func (s Service) CreateCommand(ctx context.Context, params service.CreateCommand
 	switch params.CommandType {
 	case model.CommandTypeMoveToLocation:
 		if _, ok := params.Inputs.(model.CommandMoveToLocationInputs); !ok {
+			return model.Command{}, xerror.ValidationFailed(nil, "invalid command inputs")
+		}
+	case model.CommandTypeLiftCargo:
+		if _, ok := params.Inputs.(model.CommandLiftCargoInputs); !ok {
+			return model.Command{}, xerror.ValidationFailed(nil, "invalid command inputs")
+		}
+	case model.CommandTypeDropCargo:
+		if _, ok := params.Inputs.(model.CommandDropCargoInputs); !ok {
+			return model.Command{}, xerror.ValidationFailed(nil, "invalid command inputs")
+		}
+	case model.CommandTypeOpenCargo:
+		if _, ok := params.Inputs.(model.CommandOpenCargoInputs); !ok {
+			return model.Command{}, xerror.ValidationFailed(nil, "invalid command inputs")
+		}
+	case model.CommandTypeCloseCargo:
+		if _, ok := params.Inputs.(model.CommandCloseCargoInputs); !ok {
 			return model.Command{}, xerror.ValidationFailed(nil, "invalid command inputs")
 		}
 	default:
@@ -175,12 +190,15 @@ func (s Service) ExecuteCommand(ctx context.Context, params service.ExecuteComma
 		s.log.Error("no executor found for command type",
 			slog.String("command_type", command.Type.String()))
 		errorMessage := fmt.Sprintf("no executor found for command type: %s", command.Type)
+		completedAt := time.Now()
 		params := repository.UpdateCommandParams{
-			ID:        command.ID,
-			Status:    model.CommandStatusFailed,
-			SetStatus: true,
-			Error:     &errorMessage,
-			SetError:  true,
+			ID:             command.ID,
+			Status:         model.CommandStatusFailed,
+			SetStatus:      true,
+			Error:          &errorMessage,
+			SetError:       true,
+			CompletedAt:    &completedAt,
+			SetCompletedAt: true,
 		}
 		if _, err := s.commandRepo.UpdateCommand(ctx, s.dbProvider.DB(), params); err != nil {
 			return fmt.Errorf("command repository update command: %w", err)
@@ -189,7 +207,41 @@ func (s Service) ExecuteCommand(ctx context.Context, params service.ExecuteComma
 		return nil
 	}
 
-	return executor.Execute(ctx, command)
+	if err := executor.Execute(ctx, command); err != nil {
+		errorMessage := err.Error()
+		completedAt := time.Now()
+		params := repository.UpdateCommandParams{
+			ID:             command.ID,
+			Status:         model.CommandStatusFailed,
+			SetStatus:      true,
+			Error:          &errorMessage,
+			SetError:       true,
+			CompletedAt:    &completedAt,
+			SetCompletedAt: true,
+		}
+
+		if _, updateErr := s.commandRepo.UpdateCommand(ctx, s.dbProvider.DB(), params); updateErr != nil {
+			return fmt.Errorf("execution failed and failed to update command status: %w (original error: %v)", updateErr, err)
+		}
+
+		// We've successfully updated the command status to failed, but the execution itself failed
+		return fmt.Errorf("command execution failed: %w", err)
+	}
+
+	// no error return from executor, update command status to completed
+	completedAt := time.Now()
+	updateParams := repository.UpdateCommandParams{
+		ID:             command.ID,
+		Status:         model.CommandStatusSucceeded,
+		SetStatus:      true,
+		CompletedAt:    &completedAt,
+		SetCompletedAt: true,
+	}
+	if _, err := s.commandRepo.UpdateCommand(ctx, s.dbProvider.DB(), updateParams); err != nil {
+		return fmt.Errorf("command repository update command: %w", err)
+	}
+
+	return nil
 }
 
 func (s Service) registerCommandExecutors() {
@@ -198,9 +250,43 @@ func (s Service) registerCommandExecutors() {
 		NewMoveToLocationExecutor(
 			s.commandRepo,
 			s.subscriber,
-			s.createSerialServicer,
+			s.picService,
 			s.dbProvider,
 			s.log,
+		),
+	)
+
+	s.commandExecutorRegistry.Register(
+		model.CommandTypeLiftCargo,
+		NewLiftCargoExecutor(
+			s.commandRepo,
+			s.picService,
+			s.dbProvider,
+			s.log,
+		),
+	)
+
+	s.commandExecutorRegistry.Register(
+		model.CommandTypeDropCargo,
+		NewDropCargoExecutor(
+			s.commandRepo,
+			s.picService,
+			s.dbProvider,
+			s.log,
+		),
+	)
+
+	s.commandExecutorRegistry.Register(
+		model.CommandTypeOpenCargo,
+		NewOpenCargoExecutor(
+			s.cargoControlService,
+		),
+	)
+
+	s.commandExecutorRegistry.Register(
+		model.CommandTypeCloseCargo,
+		NewCloseCargoExecutor(
+			s.cargoControlService,
 		),
 	)
 }
