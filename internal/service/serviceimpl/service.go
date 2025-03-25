@@ -48,26 +48,27 @@ func New(
 		repo.LiftMotor(),
 		repo.DriveMotor(),
 		repo.Location(),
-		picSerialClient,
 		dbProvider,
+		picSerialClient,
 		validator,
 	)
 	locationService := location.NewService(repo.Location(), pubSub, dbProvider)
-	commandService := command.NewService(
-		repo.Command(),
-		picService,
-		dbProvider,
-		pubSub,
-		pubSub,
-		validator,
-		log,
-	)
 	cargoControlService := cargocontrol.NewService(
 		repo.Cargo(),
 		repo.ESPSerialCommand(),
 		espSerialClient,
 		dbProvider,
 		validator,
+	)
+	commandService := command.NewService(
+		repo.Command(),
+		picService,
+		cargoControlService,
+		dbProvider,
+		pubSub,
+		pubSub,
+		validator,
+		log,
 	)
 	return &serviceImpl{
 		robotStateService:   robotStateService,
