@@ -105,7 +105,7 @@ docker-run-raybot:
 #########################
 .PHONY: run
 run:
-	go run cmd/raybot/main.go
+	go run cmd/raybot/main.go -config config.yml -db bin/raybot.db
 
 #########################
 # Testing
