@@ -54,96 +54,30 @@ func (p PIC) Validate() error {
 type Serial struct {
 	Port        string        `yaml:"port"`
 	BaudRate    int           `yaml:"baud_rate"`
-	DataBits    DataBits      `yaml:"data_bits"`
-	StopBits    StopBits      `yaml:"stop_bits"`
-	Parity      Parity        `yaml:"parity"`
+	DataBits    uint8         `yaml:"data_bits"`
+	StopBits    float32       `yaml:"stop_bits"`
+	Parity      string        `yaml:"parity"`
 	ReadTimeout time.Duration `yaml:"read_timeout"`
 }
 
-func (s Serial) Validate() error {
-	if s.Port == "" {
-		return fmt.Errorf("port is required")
-	}
-
+func (s *Serial) Validate() error {
 	if s.BaudRate < 1200 || s.BaudRate > 115200 {
 		return fmt.Errorf("invalid baud rate: %d", s.BaudRate)
 	}
 
-	return nil
-}
-
-type DataBits int
-
-func (d DataBits) Int() int {
-	return int(d)
-}
-
-const (
-	SerialDataBits5 DataBits = iota + 5
-	SerialDataBits6
-	SerialDataBits7
-	SerialDataBits8
-)
-
-// UnmarshalText implements [encoding.TextUnmarshaler].
-func (d *DataBits) UnmarshalText(text []byte) error {
-	switch strings.ToLower(string(text)) {
-	case "5":
-		*d = SerialDataBits5
-	case "6":
-		*d = SerialDataBits6
-	case "7":
-		*d = SerialDataBits7
-	case "8":
-		*d = SerialDataBits8
-	default:
-		return fmt.Errorf("invalid data bits: %s", text)
+	if s.DataBits != 5 && s.DataBits != 6 && s.DataBits != 7 && s.DataBits != 8 {
+		return fmt.Errorf("invalid data bits: %d", s.DataBits)
 	}
-	return nil
-}
 
-type StopBits int
-
-// UnmarshalText implements [encoding.TextUnmarshaler].
-func (s *StopBits) UnmarshalText(text []byte) error {
-	switch strings.ToLower(string(text)) {
-	case "1":
-		*s = SerialStopBitsOne
-	case "1.5":
-		*s = SerialStopBitsOnePointFive
-	case "2":
-		*s = SerialStopBitsTwo
-	default:
-		return fmt.Errorf("invalid stop bits: %s", text)
+	if s.StopBits != 1 && s.StopBits != 1.5 && s.StopBits != 2 {
+		return fmt.Errorf("invalid stop bits: %f", s.StopBits)
 	}
-	return nil
-}
 
-const (
-	SerialStopBitsOne StopBits = iota
-	SerialStopBitsOnePointFive
-	SerialStopBitsTwo
-)
-
-type Parity string
-
-// UnmarshalText implements [encoding.TextUnmarshaler].
-func (p *Parity) UnmarshalText(text []byte) error {
-	switch strings.ToLower(string(text)) {
-	case "none":
-		*p = SerialParityNone
-	case "odd":
-		*p = SerialParityOdd
-	case "even":
-		*p = SerialParityEven
-	default:
-		return fmt.Errorf("invalid parity: %s", text)
+	p := strings.ToUpper(s.Parity)
+	if p != "NONE" && p != "ODD" && p != "EVEN" {
+		return fmt.Errorf("invalid parity: %s", s.Parity)
 	}
+	s.Parity = p
+
 	return nil
 }
-
-const (
-	SerialParityNone Parity = "none"
-	SerialParityOdd  Parity = "odd"
-	SerialParityEven Parity = "even"
-)

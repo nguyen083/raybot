@@ -2,12 +2,13 @@ package standalone
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/tbe-team/raybot/internal/application"
 	"github.com/tbe-team/raybot/internal/handlers/rfidusb"
 )
 
-func startRFIDUSB(app *application.Application, interruptChan <-chan any) error {
+func startRFIDUSB(app *application.Application, interruptChan <-chan any, readyWg *sync.WaitGroup) error {
 	service := rfidusb.New(
 		app.Log,
 		app.LocationService,
@@ -20,6 +21,7 @@ func startRFIDUSB(app *application.Application, interruptChan <-chan any) error 
 
 	app.Log.Info("rfid usb service started")
 
+	readyWg.Done()
 	<-interruptChan
 
 	app.Log.Debug("rfid usb service is shutting down")

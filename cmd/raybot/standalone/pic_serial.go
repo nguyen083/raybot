@@ -2,12 +2,13 @@ package standalone
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/tbe-team/raybot/internal/application"
 	"github.com/tbe-team/raybot/internal/handlers/picserial"
 )
 
-func startPICSerial(app *application.Application, interruptChan <-chan any) error {
+func startPICSerial(app *application.Application, interruptChan <-chan any, readyWg *sync.WaitGroup) error {
 	service := picserial.New(
 		app.Cfg.Hardware.PIC,
 		app.Log,
@@ -24,6 +25,7 @@ func startPICSerial(app *application.Application, interruptChan <-chan any) erro
 
 	app.Log.Info("pic serial service started")
 
+	readyWg.Done()
 	<-interruptChan
 
 	app.Log.Debug("pic serial service is shutting down")

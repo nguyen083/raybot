@@ -127,6 +127,30 @@ func (s *service) UpdateGRPCConfig(ctx context.Context, grpcCfg config.GRPC) (co
 	return grpcCfg, nil
 }
 
+func (s *service) GetHTTPConfig(_ context.Context) (config.HTTP, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.cfg.HTTP, nil
+}
+
+func (s *service) UpdateHTTPConfig(ctx context.Context, httpCfg config.HTTP) (config.HTTP, error) {
+	if err := httpCfg.Validate(); err != nil {
+		return config.HTTP{}, fmt.Errorf("validate http config: %w", err)
+	}
+
+	cfg := *s.cfg
+	cfg.HTTP = httpCfg
+
+	if err := s.writeConfig(ctx, cfg); err != nil {
+		return config.HTTP{}, fmt.Errorf("write config: %w", err)
+	}
+
+	s.mu.Lock()
+	s.cfg = &cfg
+	s.mu.Unlock()
+
+	return httpCfg, nil
+}
 func (s *service) writeConfig(ctx context.Context, cfg config.Config) error {
 	writer, err := s.fileClient.Write(ctx, s.cfg.ConfigFilePath)
 	if err != nil {

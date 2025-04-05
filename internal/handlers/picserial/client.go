@@ -24,24 +24,24 @@ type client struct {
 func newClient(cfg config.Serial) *client {
 	mode := serial.Mode{
 		BaudRate: cfg.BaudRate,
-		DataBits: cfg.DataBits.Int(),
+		DataBits: int(cfg.DataBits),
 	}
 
 	switch cfg.StopBits {
-	case config.SerialStopBitsOne:
+	case 1:
 		mode.StopBits = serial.OneStopBit
-	case config.SerialStopBitsOnePointFive:
+	case 1.5:
 		mode.StopBits = serial.OnePointFiveStopBits
-	case config.SerialStopBitsTwo:
+	case 2:
 		mode.StopBits = serial.TwoStopBits
 	}
 
 	switch cfg.Parity {
-	case config.SerialParityNone:
+	case "NONE":
 		mode.Parity = serial.NoParity
-	case config.SerialParityOdd:
+	case "ODD":
 		mode.Parity = serial.OddParity
-	case config.SerialParityEven:
+	case "EVEN":
 		mode.Parity = serial.EvenParity
 	}
 

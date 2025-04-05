@@ -18,4 +18,7 @@ type Service interface {
 
 	GetGRPCConfig(ctx context.Context) (config.GRPC, error)
 	UpdateGRPCConfig(ctx context.Context, grpcCfg config.GRPC) (config.GRPC, error)
+
+	GetHTTPConfig(ctx context.Context) (config.HTTP, error)
+	UpdateHTTPConfig(ctx context.Context, httpCfg config.HTTP) (config.HTTP, error)
 }

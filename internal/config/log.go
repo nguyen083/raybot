@@ -15,7 +15,7 @@ type Log struct {
 
 func (l Log) Validate() error {
 	if l.Format != log.FormatJSON && l.Format != log.FormatText {
-		return fmt.Errorf("invalid format: %d", l.Format)
+		return fmt.Errorf("invalid format: %s", l.Format)
 	}
 
 	if l.Level < slog.LevelDebug || l.Level > slog.LevelError {

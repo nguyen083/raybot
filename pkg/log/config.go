@@ -7,7 +7,11 @@ import (
 )
 
 // Format represents the logging format (JSON or Text).
-type Format int
+type Format uint8
+
+func (f Format) String() string {
+	return []string{"JSON", "TEXT"}[f]
+}
 
 const (
 	FormatJSON Format = iota
@@ -33,4 +37,8 @@ func (f *Format) UnmarshalText(text []byte) error {
 		return fmt.Errorf("unknown log format: %s", text)
 	}
 	return nil
+}
+
+func (f Format) MarshalText() ([]byte, error) {
+	return []byte(f.String()), nil
 }

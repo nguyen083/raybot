@@ -23,11 +23,14 @@ func Run(configFilePath, dbPath string) {
 
 	interruptChan := cmdutil.InterruptChan()
 	var wg sync.WaitGroup
+	var hardwareWgReady sync.WaitGroup
+
+	hardwareWgReady.Add(3)
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := startPICSerial(app, interruptChan); err != nil {
+		if err := startPICSerial(app, interruptChan, &hardwareWgReady); err != nil {
 			log.Printf("error starting PIC serial service: %v", err)
 		}
 	}()
@@ -35,7 +38,7 @@ func Run(configFilePath, dbPath string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := startESPSerial(app, interruptChan); err != nil {
+		if err := startESPSerial(app, interruptChan, &hardwareWgReady); err != nil {
 			log.Printf("error starting ESP serial service: %v", err)
 		}
 	}()
@@ -43,8 +46,19 @@ func Run(configFilePath, dbPath string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := startRFIDUSB(app, interruptChan); err != nil {
+		if err := startRFIDUSB(app, interruptChan, &hardwareWgReady); err != nil {
 			log.Printf("error starting RFID USB service: %v", err)
+		}
+	}()
+
+	// Wait for all hardware components to ensure they are ready
+	hardwareWgReady.Wait()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := startHTTPService(app, interruptChan); err != nil {
+			log.Printf("error starting HTTP service: %v", err)
 		}
 	}()
 

@@ -12,6 +12,7 @@ type Config struct {
 	Hardware Hardware `yaml:"hardware"`
 	Cloud    Cloud    `yaml:"cloud"`
 	GRPC     GRPC     `yaml:"grpc"`
+	HTTP     HTTP     `yaml:"http"`
 
 	ConfigFilePath string `yaml:"-"`
 	DBPath         string `yaml:"-"`
@@ -32,6 +33,10 @@ func (c *Config) Validate() error {
 
 	if err := c.GRPC.Validate(); err != nil {
 		return fmt.Errorf("validate grpc: %w", err)
+	}
+
+	if err := c.HTTP.Validate(); err != nil {
+		return fmt.Errorf("validate http: %w", err)
 	}
 
 	return nil

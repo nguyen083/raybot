@@ -6,23 +6,27 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/tbe-team/raybot"
+	"github.com/tbe-team/raybot/api/openapi"
 )
 
 // Register registers the swagger handler on the given router
-func Register(r chi.Router, specPath string) {
+func Register(r chi.Router) {
+	specPath := "/docs/openapi.json"
 	template := getTemplate(specPath)
+
 	r.Get("/docs", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		//nolint:errcheck
 		w.Write([]byte(template))
 	})
+
+	specBytes := openapi.GetSpecBytes()
 	r.Get(specPath, func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		//nolint:errcheck
-		w.Write(raybot.OpenapiSpec)
+		w.Write(specBytes)
 	})
 }
 

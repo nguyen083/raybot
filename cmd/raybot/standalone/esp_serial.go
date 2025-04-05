@@ -2,12 +2,13 @@ package standalone
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/tbe-team/raybot/internal/application"
 	"github.com/tbe-team/raybot/internal/handlers/espserial"
 )
 
-func startESPSerial(app *application.Application, interruptChan <-chan any) error {
+func startESPSerial(app *application.Application, interruptChan <-chan any, readyWg *sync.WaitGroup) error {
 	service := espserial.New(
 		app.Cfg.Hardware.ESP,
 		app.Log,
@@ -21,6 +22,7 @@ func startESPSerial(app *application.Application, interruptChan <-chan any) erro
 
 	app.Log.Info("esp serial service started")
 
+	readyWg.Done()
 	<-interruptChan
 
 	app.Log.Debug("esp serial service is shutting down")
