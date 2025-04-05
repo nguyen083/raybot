@@ -45,6 +45,7 @@ func (s *Service) Run() (CleanupFunc, error) {
 		swagger.Register(r)
 	}
 
+	s.RegisterUIHandler(r)
 	s.RegisterHandlers(r)
 
 	return s.RunWithServer(r)
