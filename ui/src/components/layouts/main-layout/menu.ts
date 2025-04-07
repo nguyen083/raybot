@@ -1,4 +1,4 @@
-import type { Component } from 'vue'
+import type { Item } from './Navigation.vue'
 import {
   ChartBarBig,
   Command,
@@ -6,33 +6,27 @@ import {
   Settings2,
 } from 'lucide-vue-next'
 
-interface Item {
-  name: string
-  path: string
-  icon: Component
-}
-
-const items: Item[] = [
+export const menus: Item[] = [
   // {
-  //   name: 'State',
+  //   title: 'State',
   //   path: '/state',
   //   icon: ChartBarBig,
   // },
   // {
-  //   name: 'Commands',
+  //   title: 'Commands',
   //   path: '/commands',
   //   icon: Command,
   // },
   {
-    name: 'Settings',
+    title: 'Settings',
     path: '/settings',
     icon: Settings2,
   },
   {
-    name: 'Restart',
+    title: 'Restart',
     path: '/system/restart',
     icon: Power,
   },
 ]
 
-export { items as routes }
+export { menus as routes }
