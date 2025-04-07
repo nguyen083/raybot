@@ -22,6 +22,10 @@ type DoorMotorState struct {
 
 type DoorDirection string
 
+func (d DoorDirection) String() string {
+	return string(d)
+}
+
 func (d DoorDirection) Validate() error {
 	switch d {
 	case DirectionOpen, DirectionClose:

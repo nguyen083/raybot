@@ -9,6 +9,25 @@ import (
 	"context"
 )
 
+const cargoDoorMotorGet = `-- name: CargoDoorMotorGet :one
+SELECT id, direction, speed, is_running, enabled, updated_at FROM cargo_door_motor
+WHERE id = 1
+`
+
+func (q *Queries) CargoDoorMotorGet(ctx context.Context, db DBTX) (CargoDoorMotor, error) {
+	row := db.QueryRowContext(ctx, cargoDoorMotorGet)
+	var i CargoDoorMotor
+	err := row.Scan(
+		&i.ID,
+		&i.Direction,
+		&i.Speed,
+		&i.IsRunning,
+		&i.Enabled,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const cargoDoorMotorUpdate = `-- name: CargoDoorMotorUpdate :one
 UPDATE cargo_door_motor
 SET
@@ -44,6 +63,24 @@ func (q *Queries) CargoDoorMotorUpdate(ctx context.Context, db DBTX, arg CargoDo
 		&i.Speed,
 		&i.IsRunning,
 		&i.Enabled,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const cargoGet = `-- name: CargoGet :one
+SELECT id, is_open, qr_code, bottom_distance, updated_at FROM cargo
+WHERE id = 1
+`
+
+func (q *Queries) CargoGet(ctx context.Context, db DBTX) (Cargo, error) {
+	row := db.QueryRowContext(ctx, cargoGet)
+	var i Cargo
+	err := row.Scan(
+		&i.ID,
+		&i.IsOpen,
+		&i.QrCode,
+		&i.BottomDistance,
 		&i.UpdatedAt,
 	)
 	return i, err

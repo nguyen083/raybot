@@ -1,3 +1,11 @@
+-- name: BatteryChargeSettingGet :one
+SELECT * FROM battery_charge_setting
+WHERE id = 1;
+
+-- name: BatteryDischargeSettingGet :one
+SELECT * FROM battery_discharge_setting
+WHERE id = 1;
+
 -- name: BatteryChargeSettingUpdate :exec
 UPDATE battery_charge_setting
 SET

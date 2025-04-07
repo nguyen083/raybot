@@ -35,6 +35,8 @@ type BatteryStateRepository interface {
 }
 
 type SettingRepository interface {
+	GetChargeSetting(ctx context.Context) (ChargeSetting, error)
+	GetDischargeSetting(ctx context.Context) (DischargeSetting, error)
 	UpdateChargeSetting(ctx context.Context, params UpdateChargeSettingParams) error
 	UpdateDischargeSetting(ctx context.Context, params UpdateDischargeSettingParams) error
 }

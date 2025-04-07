@@ -9,6 +9,23 @@ import (
 	"context"
 )
 
+const batteryChargeSettingGet = `-- name: BatteryChargeSettingGet :one
+SELECT id, current_limit, enabled, updated_at FROM battery_charge_setting
+WHERE id = 1
+`
+
+func (q *Queries) BatteryChargeSettingGet(ctx context.Context, db DBTX) (BatteryChargeSetting, error) {
+	row := db.QueryRowContext(ctx, batteryChargeSettingGet)
+	var i BatteryChargeSetting
+	err := row.Scan(
+		&i.ID,
+		&i.CurrentLimit,
+		&i.Enabled,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const batteryChargeSettingUpdate = `-- name: BatteryChargeSettingUpdate :exec
 UPDATE battery_charge_setting
 SET
@@ -27,6 +44,23 @@ type BatteryChargeSettingUpdateParams struct {
 func (q *Queries) BatteryChargeSettingUpdate(ctx context.Context, db DBTX, arg BatteryChargeSettingUpdateParams) error {
 	_, err := db.ExecContext(ctx, batteryChargeSettingUpdate, arg.CurrentLimit, arg.Enabled, arg.UpdatedAt)
 	return err
+}
+
+const batteryDischargeSettingGet = `-- name: BatteryDischargeSettingGet :one
+SELECT id, current_limit, enabled, updated_at FROM battery_discharge_setting
+WHERE id = 1
+`
+
+func (q *Queries) BatteryDischargeSettingGet(ctx context.Context, db DBTX) (BatteryDischargeSetting, error) {
+	row := db.QueryRowContext(ctx, batteryDischargeSettingGet)
+	var i BatteryDischargeSetting
+	err := row.Scan(
+		&i.ID,
+		&i.CurrentLimit,
+		&i.Enabled,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const batteryDischargeSettingUpdate = `-- name: BatteryDischargeSettingUpdate :exec

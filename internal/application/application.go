@@ -12,6 +12,8 @@ import (
 	"github.com/tbe-team/raybot/internal/services/cargo/cargoimpl"
 	configsvc "github.com/tbe-team/raybot/internal/services/config"
 	"github.com/tbe-team/raybot/internal/services/config/configimpl"
+	"github.com/tbe-team/raybot/internal/services/dashboarddata"
+	"github.com/tbe-team/raybot/internal/services/dashboarddata/dashboarddataimpl"
 	"github.com/tbe-team/raybot/internal/services/distancesensor"
 	"github.com/tbe-team/raybot/internal/services/distancesensor/distancesensorimpl"
 	"github.com/tbe-team/raybot/internal/services/drivemotor"
@@ -42,6 +44,7 @@ type Application struct {
 	LocationService       location.Service
 	ConfigService         configsvc.Service
 	SystemService         system.Service
+	DashboardDataService  dashboarddata.Service
 }
 
 type CleanupFunc func() error
@@ -96,6 +99,15 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 	locationService := locationimpl.NewService(validator, locationRepository)
 	configService := configimpl.New(cfg, fileClient)
 	systemService := systemimpl.NewService(log)
+	dashboardDataService := dashboarddataimpl.NewService(
+		batteryStateRepository,
+		batterySettingRepository,
+		distanceSensorStateRepository,
+		liftMotorStateRepository,
+		driveMotorStateRepository,
+		locationRepository,
+		cargoRepository,
+	)
 
 	cleanup := func() error {
 		return db.Close()
@@ -113,5 +125,6 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 		LocationService:       locationService,
 		ConfigService:         configService,
 		SystemService:         systemService,
+		DashboardDataService:  dashboardDataService,
 	}, cleanup, nil
 }

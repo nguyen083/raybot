@@ -14,11 +14,84 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
+
+// BatteryState defines model for BatteryState.
+type BatteryState struct {
+	// Current The current of the battery
+	Current uint16 `json:"current"`
+
+	// Temp The temperature of the battery
+	Temp uint8 `json:"temp"`
+
+	// Voltage The voltage of the battery
+	Voltage uint16 `json:"voltage"`
+
+	// CellVoltages The cell voltages of the battery
+	CellVoltages []uint16 `json:"cellVoltages"`
+
+	// Percent The percentage of the battery
+	Percent uint8 `json:"percent"`
+
+	// Fault The fault of the battery
+	Fault uint8 `json:"fault"`
+
+	// Health The health of the battery
+	Health uint8 `json:"health"`
+
+	// UpdatedAt The updated at time of the battery
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// CargoDoorMotorState defines model for CargoDoorMotorState.
+type CargoDoorMotorState struct {
+	// Direction The direction of the cargo door motor
+	Direction string `json:"direction"`
+
+	// Speed The speed of the cargo door motor
+	Speed uint8 `json:"speed"`
+
+	// IsRunning Whether the cargo door motor is running
+	IsRunning bool `json:"isRunning"`
+
+	// Enabled Whether the cargo door motor is enabled
+	Enabled bool `json:"enabled"`
+
+	// UpdatedAt The updated at time of the cargo door motor
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// CargoState defines model for CargoState.
+type CargoState struct {
+	// IsOpen Whether the cargo is open
+	IsOpen bool `json:"isOpen"`
+
+	// QrCode The QR code read from the cargo QR scanner
+	QrCode string `json:"qrCode"`
+
+	// BottomDistance The bottom distance of the cargo
+	BottomDistance uint16 `json:"bottomDistance"`
+
+	// UpdatedAt The updated at time of the cargo
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// ChargeState defines model for ChargeState.
+type ChargeState struct {
+	// CurrentLimit The current limit of the charge
+	CurrentLimit uint16 `json:"currentLimit"`
+
+	// Enabled Whether the charge is enabled
+	Enabled bool `json:"enabled"`
+
+	// UpdatedAt The updated at time of the charge
+	UpdatedAt time.Time `json:"updatedAt"`
+}
 
 // CloudConfig defines model for CloudConfig.
 type CloudConfig struct {
@@ -27,6 +100,51 @@ type CloudConfig struct {
 
 	// Token The token for the cloud service
 	Token string `json:"token"`
+}
+
+// DischargeState defines model for DischargeState.
+type DischargeState struct {
+	// CurrentLimit The current limit of the discharge
+	CurrentLimit uint16 `json:"currentLimit"`
+
+	// Enabled Whether the discharge is enabled
+	Enabled bool `json:"enabled"`
+
+	// UpdatedAt The updated at time of the discharge
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// DistanceSensorState defines model for DistanceSensorState.
+type DistanceSensorState struct {
+	// FrontDistance The front distance of the distance sensor
+	FrontDistance uint16 `json:"frontDistance"`
+
+	// BackDistance The back distance of the distance sensor
+	BackDistance uint16 `json:"backDistance"`
+
+	// DownDistance The down distance of the distance sensor
+	DownDistance uint16 `json:"downDistance"`
+
+	// UpdatedAt The updated at time of the distance sensor
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// DriveMotorState defines model for DriveMotorState.
+type DriveMotorState struct {
+	// Direction The direction of the drive motor
+	Direction string `json:"direction"`
+
+	// Speed The speed of the drive motor (0-100)
+	Speed uint8 `json:"speed"`
+
+	// IsRunning Whether the drive motor is running
+	IsRunning bool `json:"isRunning"`
+
+	// Enabled Whether the drive motor is enabled
+	Enabled bool `json:"enabled"`
+
+	// UpdatedAt The updated at time of the drive motor
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // ESPConfig defines model for ESPConfig.
@@ -77,6 +195,33 @@ type HardwareConfig struct {
 	Pic PICConfig `json:"pic"`
 }
 
+// LiftMotorState defines model for LiftMotorState.
+type LiftMotorState struct {
+	// CurrentPosition The current position of the lift motor
+	CurrentPosition uint16 `json:"currentPosition"`
+
+	// TargetPosition The target position of the lift motor
+	TargetPosition uint16 `json:"targetPosition"`
+
+	// IsRunning Whether the lift motor is running
+	IsRunning bool `json:"isRunning"`
+
+	// Enabled Whether the lift motor is enabled
+	Enabled bool `json:"enabled"`
+
+	// UpdatedAt The updated at time of the lift motor
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// LocationState defines model for LocationState.
+type LocationState struct {
+	// CurrentLocation The current location of the robot
+	CurrentLocation string `json:"currentLocation"`
+
+	// UpdatedAt The updated at time of the location
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 // LogConfig defines model for LogConfig.
 type LogConfig struct {
 	// Level The global log level for the application
@@ -92,6 +237,19 @@ type LogConfig struct {
 // PICConfig defines model for PICConfig.
 type PICConfig struct {
 	Serial SerialConfig `json:"serial"`
+}
+
+// RobotStateResponse defines model for RobotStateResponse.
+type RobotStateResponse struct {
+	Battery        BatteryState        `json:"battery"`
+	Charge         ChargeState         `json:"charge"`
+	Discharge      DischargeState      `json:"discharge"`
+	DistanceSensor DistanceSensorState `json:"distanceSensor"`
+	LiftMotor      LiftMotorState      `json:"liftMotor"`
+	DriveMotor     DriveMotorState     `json:"driveMotor"`
+	Location       LocationState       `json:"location"`
+	Cargo          CargoState          `json:"cargo"`
+	CargoDoorMotor CargoDoorMotorState `json:"cargoDoorMotor"`
 }
 
 // SerialConfig defines model for SerialConfig.
@@ -162,6 +320,9 @@ type ServerInterface interface {
 	// Update the log configuration
 	// (PUT /configs/log)
 	UpdateLogConfig(w http.ResponseWriter, r *http.Request)
+	// Get robot state
+	// (GET /robot-state)
+	GetRobotState(w http.ResponseWriter, r *http.Request)
 	// Restart the application
 	// (POST /system/restart)
 	RestartApplication(w http.ResponseWriter, r *http.Request)
@@ -228,6 +389,12 @@ func (_ Unimplemented) GetLogConfig(w http.ResponseWriter, r *http.Request) {
 // Update the log configuration
 // (PUT /configs/log)
 func (_ Unimplemented) UpdateLogConfig(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get robot state
+// (GET /robot-state)
+func (_ Unimplemented) GetRobotState(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -377,6 +544,20 @@ func (siw *ServerInterfaceWrapper) UpdateLogConfig(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateLogConfig(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRobotState operation middleware
+func (siw *ServerInterfaceWrapper) GetRobotState(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRobotState(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -542,6 +723,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/configs/log", wrapper.UpdateLogConfig)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/robot-state", wrapper.GetRobotState)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/system/restart", wrapper.RestartApplication)
@@ -805,6 +989,31 @@ func (response UpdateLogConfig400JSONResponse) VisitUpdateLogConfigResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetRobotStateRequestObject struct {
+}
+
+type GetRobotStateResponseObject interface {
+	VisitGetRobotStateResponse(w http.ResponseWriter) error
+}
+
+type GetRobotState200JSONResponse RobotStateResponse
+
+func (response GetRobotState200JSONResponse) VisitGetRobotStateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRobotState400JSONResponse ErrorResponse
+
+func (response GetRobotState400JSONResponse) VisitGetRobotStateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type RestartApplicationRequestObject struct {
 }
 
@@ -861,6 +1070,9 @@ type StrictServerInterface interface {
 	// Update the log configuration
 	// (PUT /configs/log)
 	UpdateLogConfig(ctx context.Context, request UpdateLogConfigRequestObject) (UpdateLogConfigResponseObject, error)
+	// Get robot state
+	// (GET /robot-state)
+	GetRobotState(ctx context.Context, request GetRobotStateRequestObject) (GetRobotStateResponseObject, error)
 	// Restart the application
 	// (POST /system/restart)
 	RestartApplication(ctx context.Context, request RestartApplicationRequestObject) (RestartApplicationResponseObject, error)
@@ -1170,6 +1382,30 @@ func (sh *strictHandler) UpdateLogConfig(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// GetRobotState operation middleware
+func (sh *strictHandler) GetRobotState(w http.ResponseWriter, r *http.Request) {
+	var request GetRobotStateRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetRobotState(ctx, request.(GetRobotStateRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetRobotState")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetRobotStateResponseObject); ok {
+		if err := validResponse.VisitGetRobotStateResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // RestartApplication operation middleware
 func (sh *strictHandler) RestartApplication(w http.ResponseWriter, r *http.Request) {
 	var request RestartApplicationRequestObject
@@ -1197,31 +1433,47 @@ func (sh *strictHandler) RestartApplication(w http.ResponseWriter, r *http.Reque
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xZX3OjNhD/Khq1j5zBiZOmfrvkctd0WifjOL3OdO5BhjXWFSROErnzZPzdOxJgsBHI",
-	"ycSp3zBatKvfnxXCTzjkacYZMCXx+AnLcAkpMZdXCc+jK84WNNY/M8EzEIqCGSRRJECaywhkKGimKGd4",
-	"jGdLQOUgWnCB1BJQqGdCEsQjDQF7GH6QNEsAj3HCQ5IsuVTjsyA4G2IPq1WmB6QSlMXYwz/ecRGBwOPh",
-	"2sOK/wvMntMM7ZFxFJ2M4OJiPhqe/jKan47I2egiOA+D4cloPgrOTvpKOFmvPSzgW04FRHj8zwaFqrIv",
-	"m4f5/CuECq89fH1/1wWiBEFJoq9+FrDAY/yTX7Phl1T49yaqnGO3gnIKa2IhuJiCzDiT0E4e8gjaUIa5",
-	"VDxFgqzmXCHQUyAT2cSQKkgHE64+8pxFLs4iUIQmJqV+TrqW+5FCEpna9SLKqYkQZNWc+XTt4RSkJPGe",
-	"i6iCm+u4UZAixhVauBbSYr7EpJrVhn9jIS3wF3qsXbi5jRhJt+ssb/TC3AlG9/InJAVEJdqs6zkAFCvo",
-	"R+DT9O6qS/vAyDyxlPt5CWoJAimOihDj53h6d2XsDKK5BCVy2OSdc54AYdtVezjjQtlbhh7ZdIyODKYt",
-	"bVJQpiA2AQ3sd4Ax+bxqfTZYfpvNOlvCntXqKSzVXgRB0F+sh+V3EuvbeyJ/X4Sjh5vnAW9HpUpuhYWI",
-	"6DsR0KkYmbl6R91rNfE0dMXf3Vx19FWdrJjCVuofPO7ZGO95LsJ+aZMoMuhKE6rv6F8Jj5sgL0gie1HW",
-	"TXDBRUo6JJPwGBXjG+GQLEtoSEyQFmme6tX+fn87wR6eXf890+utW0Q50G4LMX/X0ys8nMAjJPaq4oTP",
-	"SWKKM1GO2j5cXz58wh6+mXy8xR7+/H6qK7qeTm+n27VWgc8rtuXfovINsF6DUZsUagm98fa+9Vwr95zk",
-	"0ZQosFOgR5EgCjbYF4lQyBmDsGKggvbX8/62ogmPiCKXVHW8EepRNKdK7pfwoi+bVn1GBFWrjkZpxvoT",
-	"ldqa3E6utZj+utaauv3wYVtR5fDzBHXm3nP0fr4fENiP4NFXavVwfxm4XgEEkGhGU+B5R3IdgFQR0Z0f",
-	"UYYkhJxFslnK0MMpZTTVyNVqYHk6L+mpQaFMNWs717uO4lm3PPToM+QxrNsejniu99n+ghYJJ+p81Cxq",
-	"1LFDbYzTkHSj/I30tuFuG1RPT9mC2xc8LV5N39/pXTWhIZSv6OZNb4z/vJlhD+ciwWO8VCqTY9/nGbBi",
-	"uxhwEfvlQ9LXsfpFmSojmK2ZH0HIImkwGA4CHaenIRnFY3w6CAaBWZBaGl780DQT6ZvTk74Tg0VJn0A1",
-	"zljFM7mo2rZuQub6Jipim8dIDVpxHjEJT4KgOIkwBcxkamwB/lfJWX0kdbXRZhoDfht0W8FrD49esYrt",
-	"M5eljksSoSl8y0Eq0+xlnqZErJywKhLL4txhVvhFNxmbzR+ySLf1ffkpwncpMuVd8mh1OHZq5+lXyfX/",
-	"K4zcoBAduUCc1LY0svZqT8ciC52WNocgp6Mbx7oD8tbI0kGbpdrjs7MV0he4eQ9qiugddl7fy7vEvJ2V",
-	"3ZKonHzU0nCx2uvjZXlKdnq5CnT7eefgfUACdzJ1kNhR+fF5uxPiF/h7T7qKJyyMvb7PbWS9ndf3k0rl",
-	"96OXzD5M9/teqczpefNZ0O33+vvjIQmss3SQZ6n2+DxuhfQF/t6DmtLb2+wcwNc7xLyhp52SqPx81NJw",
-	"sdrr44THThsnPHa7uP4GfUDG6iQdhLVLPT4L2+B8gYPdrBTB28S8vn93OHk7+zrFULn3mEXhINTqXbmS",
-	"ClJfgFSk+LCbcWkRy7QI2P0zA5GFAoFOq6+qg5Zwygffb/0BssPjqJ1vwtFVCefxANwBQgPbAk6NrX7Q",
-	"/Imp7z+VHzx9klH/cYjXX9b/BQAA///A5SRcniIAAA==",
+	"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",
+	"7oP10/qvAAAA//9HKrLB2D4AAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -1,3 +1,11 @@
+-- name: CargoGet :one
+SELECT * FROM cargo
+WHERE id = 1;
+
+-- name: CargoDoorMotorGet :one
+SELECT * FROM cargo_door_motor
+WHERE id = 1;
+
 -- name: CargoUpdateIsOpen :one
 UPDATE cargo
 SET

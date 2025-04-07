@@ -15,7 +15,9 @@ type batteryStateRepository struct {
 
 func NewBatteryStateRepository() battery.BatteryStateRepository {
 	return &batteryStateRepository{
-		battery: battery.BatteryState{},
+		battery: battery.BatteryState{
+			CellVoltages: []uint16{0, 0, 0, 0}, // avoid nil
+		},
 	}
 }
 

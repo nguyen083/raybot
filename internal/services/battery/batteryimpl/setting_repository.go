@@ -22,6 +22,44 @@ func NewBatterySettingRepository(db db.DB, queries *sqlc.Queries) battery.Settin
 	}
 }
 
+func (r batterySettingRepository) GetChargeSetting(ctx context.Context) (battery.ChargeSetting, error) {
+	row, err := r.queries.BatteryChargeSettingGet(ctx, r.db)
+	if err != nil {
+		return battery.ChargeSetting{}, fmt.Errorf("failed to get charge setting: %w", err)
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, row.UpdatedAt)
+	if err != nil {
+		return battery.ChargeSetting{}, fmt.Errorf("failed to parse updated at: %w", err)
+	}
+
+	//nolint:gosec
+	return battery.ChargeSetting{
+		CurrentLimit: uint16(row.CurrentLimit),
+		Enabled:      row.Enabled == 1,
+		UpdatedAt:    updatedAt,
+	}, nil
+}
+
+func (r batterySettingRepository) GetDischargeSetting(ctx context.Context) (battery.DischargeSetting, error) {
+	row, err := r.queries.BatteryDischargeSettingGet(ctx, r.db)
+	if err != nil {
+		return battery.DischargeSetting{}, fmt.Errorf("failed to get discharge setting: %w", err)
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, row.UpdatedAt)
+	if err != nil {
+		return battery.DischargeSetting{}, fmt.Errorf("failed to parse updated at: %w", err)
+	}
+
+	//nolint:gosec
+	return battery.DischargeSetting{
+		CurrentLimit: uint16(row.CurrentLimit),
+		Enabled:      row.Enabled == 1,
+		UpdatedAt:    updatedAt,
+	}, nil
+}
+
 func (r batterySettingRepository) UpdateChargeSetting(ctx context.Context, params battery.UpdateChargeSettingParams) error {
 	if err := r.queries.BatteryChargeSettingUpdate(ctx, r.db, sqlc.BatteryChargeSettingUpdateParams{
 		CurrentLimit: int64(params.CurrentLimit),

@@ -14,6 +14,7 @@ import (
 	"github.com/tbe-team/raybot/internal/handlers/http/middleware"
 	"github.com/tbe-team/raybot/internal/handlers/http/swagger"
 	configsvc "github.com/tbe-team/raybot/internal/services/config"
+	"github.com/tbe-team/raybot/internal/services/dashboarddata"
 	"github.com/tbe-team/raybot/internal/services/system"
 )
 
@@ -21,8 +22,9 @@ type Service struct {
 	cfg config.HTTP
 	log *slog.Logger
 
-	configService configsvc.Service
-	systemService system.Service
+	configService        configsvc.Service
+	systemService        system.Service
+	dashboardDataService dashboarddata.Service
 }
 
 type CleanupFunc func(ctx context.Context) error
@@ -32,12 +34,14 @@ func New(
 	log *slog.Logger,
 	configService configsvc.Service,
 	systemService system.Service,
+	dashboardDataService dashboarddata.Service,
 ) *Service {
 	return &Service{
-		cfg:           cfg,
-		log:           log.With("service", "http"),
-		configService: configService,
-		systemService: systemService,
+		cfg:                  cfg,
+		log:                  log.With("service", "http"),
+		configService:        configService,
+		systemService:        systemService,
+		dashboardDataService: dashboardDataService,
 	}
 }
 
@@ -106,11 +110,13 @@ var _ gen.StrictServerInterface = (*handler)(nil)
 type handler struct {
 	*configHandler
 	*systemHandler
+	*dashboardDataHandler
 }
 
 func (s *Service) newHandler() *handler {
 	return &handler{
-		configHandler: newConfigHandler(s.configService),
-		systemHandler: newSystemHandler(s.systemService),
+		configHandler:        newConfigHandler(s.configService),
+		systemHandler:        newSystemHandler(s.systemService),
+		dashboardDataHandler: newDashboardDataHandler(s.dashboardDataService),
 	}
 }
