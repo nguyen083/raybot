@@ -31,7 +31,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'restart',
         name: 'restart',
-        component: () => import('@/views/system/RestartView.vue'),
+        component: () => import('@/views/RestartView.vue'),
         meta: { title: 'System Restart' },
       },
     ],

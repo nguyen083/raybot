@@ -2,12 +2,10 @@
 import { PageContainer } from '@/components/shared'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { useMutationSystemRestart } from '@/composables/use-system'
+import { useSystemRestartMutation } from '@/composables/use-system'
 import { AlertTriangle, Loader, RefreshCw } from 'lucide-vue-next'
-import { push } from 'notivue'
-import { ref } from 'vue'
 
-const { mutate, isPending } = useMutationSystemRestart()
+const { mutate, isPending } = useSystemRestartMutation()
 const restartInitiated = ref(false)
 
 function handleRestart() {
@@ -18,14 +16,14 @@ function handleRestart() {
 
   mutate(undefined, {
     onSuccess: () => {
-      push.success({
+      notification.success({
         message: 'System will restart in 3 seconds. Please refresh the page after a moment.',
         title: 'Restarting',
       })
     },
     onError: (error) => {
       restartInitiated.value = false
-      push.error({
+      notification.error({
         message: error.message,
         title: 'Error',
       })
@@ -39,10 +37,10 @@ function handleRestart() {
     <div class="flex flex-col w-full">
       <div class="mb-6">
         <h1 class="text-xl font-semibold">
-          System Restart
+          Application Restart
         </h1>
         <p class="text-sm text-muted-foreground">
-          Restart the system to apply configuration changes
+          Restart the application to apply configuration changes
         </p>
       </div>
 
@@ -56,7 +54,7 @@ function handleRestart() {
                   Warning
                 </h3>
                 <p class="text-sm text-yellow-600 dark:text-yellow-400">
-                  Restarting the system will temporarily interrupt all services. Make sure all important operations are completed before proceeding.
+                  Restarting the application will temporarily interrupt all services. Make sure all important operations are completed before proceeding.
                 </p>
               </div>
             </div>

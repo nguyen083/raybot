@@ -6,7 +6,7 @@ interface Item {
   title: string
   path: string
   icon: LucideIcon
-  isActive: boolean
+  isActive?: boolean
 }
 
 interface Props {
