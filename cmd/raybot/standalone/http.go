@@ -13,6 +13,7 @@ func startHTTPService(app *application.Application, interruptChan <-chan any) er
 		app.Cfg.HTTP,
 		app.Log,
 		app.ConfigService,
+		app.SystemService,
 	)
 
 	cleanup, err := service.Run()

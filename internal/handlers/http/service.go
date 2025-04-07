@@ -14,6 +14,7 @@ import (
 	"github.com/tbe-team/raybot/internal/handlers/http/middleware"
 	"github.com/tbe-team/raybot/internal/handlers/http/swagger"
 	configsvc "github.com/tbe-team/raybot/internal/services/config"
+	"github.com/tbe-team/raybot/internal/services/system"
 )
 
 type Service struct {
@@ -21,6 +22,7 @@ type Service struct {
 	log *slog.Logger
 
 	configService configsvc.Service
+	systemService system.Service
 }
 
 type CleanupFunc func(ctx context.Context) error
@@ -29,11 +31,13 @@ func New(
 	cfg config.HTTP,
 	log *slog.Logger,
 	configService configsvc.Service,
+	systemService system.Service,
 ) *Service {
 	return &Service{
 		cfg:           cfg,
 		log:           log.With("service", "http"),
 		configService: configService,
+		systemService: systemService,
 	}
 }
 
@@ -101,10 +105,12 @@ var _ gen.StrictServerInterface = (*handler)(nil)
 
 type handler struct {
 	*configHandler
+	*systemHandler
 }
 
 func (s *Service) newHandler() *handler {
 	return &handler{
 		configHandler: newConfigHandler(s.configService),
+		systemHandler: newSystemHandler(s.systemService),
 	}
 }

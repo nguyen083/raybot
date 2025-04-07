@@ -20,6 +20,8 @@ import (
 	"github.com/tbe-team/raybot/internal/services/liftmotor/liftmotorimpl"
 	"github.com/tbe-team/raybot/internal/services/location"
 	"github.com/tbe-team/raybot/internal/services/location/locationimpl"
+	"github.com/tbe-team/raybot/internal/services/system"
+	"github.com/tbe-team/raybot/internal/services/system/systemimpl"
 	"github.com/tbe-team/raybot/internal/storage/db"
 	"github.com/tbe-team/raybot/internal/storage/db/sqlc"
 	"github.com/tbe-team/raybot/internal/storage/file"
@@ -39,6 +41,7 @@ type Application struct {
 	CargoService          cargo.Service
 	LocationService       location.Service
 	ConfigService         configsvc.Service
+	SystemService         system.Service
 }
 
 type CleanupFunc func() error
@@ -92,6 +95,7 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 	cargoService := cargoimpl.NewService(validator, cargoRepository)
 	locationService := locationimpl.NewService(validator, locationRepository)
 	configService := configimpl.New(cfg, fileClient)
+	systemService := systemimpl.NewService(log)
 
 	cleanup := func() error {
 		return db.Close()
@@ -108,5 +112,6 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 		CargoService:          cargoService,
 		LocationService:       locationService,
 		ConfigService:         configService,
+		SystemService:         systemService,
 	}, cleanup, nil
 }
