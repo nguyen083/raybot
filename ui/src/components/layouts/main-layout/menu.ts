@@ -13,19 +13,19 @@ interface Item {
 }
 
 const items: Item[] = [
+  // {
+  //   name: 'State',
+  //   path: '/state',
+  //   icon: ChartBarBig,
+  // },
+  // {
+  //   name: 'Commands',
+  //   path: '/commands',
+  //   icon: Command,
+  // },
   {
-    name: 'State',
-    path: '/state',
-    icon: ChartBarBig,
-  },
-  {
-    name: 'Commands',
-    path: '/commands',
-    icon: Command,
-  },
-  {
-    name: 'System config',
-    path: '/system/configuration',
+    name: 'Settings',
+    path: '/settings',
     icon: Settings2,
   },
   {
