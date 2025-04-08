@@ -27,6 +27,15 @@ func Run(configFilePath, dbPath string) {
 
 	hardwareWgReady.Add(3)
 
+	// We need to start the event service first to ensure that the event handlers are registered
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := startEventService(app, interruptChan); err != nil {
+			log.Printf("error starting event service: %v", err)
+		}
+	}()
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
