@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import StateOverview from '@/components/app/state/StateOverview.vue'
+import TabContent from '@/components/app/state/TabContent.vue'
 import PageContainer from '@/components/shared/PageContainer.vue'
-import StateOverview from '@/components/state/StateOverview.vue'
-import TabContent from '@/components/state/TabContent.vue'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useQueryRobotState } from '@/composables/use-robot-state'

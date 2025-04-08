@@ -8,21 +8,6 @@ import MotorsCard from './MotorsCard.vue'
 const props = defineProps<{
   robotState: RobotState
 }>()
-
-// const getPortsConnected = computed(() => {
-//   let count = 0
-//   if (props.robotState.connections.uart.pic)
-//     count++
-//   if (props.robotState.connections.uart.esp)
-//     count++
-//   if (props.robotState.connections.usb.rfid)
-//     count++
-//   return count
-// })
-
-// const getTotalPorts = computed(() => {
-//   return 3 // 2 UART + 1 USB
-// })
 </script>
 
 <template>
@@ -42,10 +27,8 @@ const props = defineProps<{
     />
 
     <!-- Connections Card -->
-    <!-- <ConnectionsCard
-      :connections="robotState.connections"
-      :ports-connected="getPortsConnected"
-      :total-ports="getTotalPorts"
-    /> -->
+    <ConnectionsCard
+      :app-connection="props.robotState.appConnection"
+    />
   </div>
 </template>

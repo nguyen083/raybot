@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { RobotState } from '@/types/robot-state'
+import { ref } from 'vue'
 import BatteryTabContent from './BatteryTabContent.vue'
 import CargoTabContent from './CargoTabContent.vue'
+import ConnectionsTabContent from './ConnectionsTabContent.vue'
 import DistanceSensorsTabContent from './DistanceSensorsTabContent.vue'
 import MotorsTabContent from './MotorsTabContent.vue'
 
@@ -16,6 +18,7 @@ const tabs = [
   { label: 'Motors', value: 'motors' },
   { label: 'Sensors', value: 'sensors' },
   { label: 'Cargo', value: 'cargo' },
+  { label: 'Connections', value: 'connections' },
 ]
 </script>
 
@@ -59,6 +62,11 @@ const tabs = [
       v-if="activeTab === 'cargo'"
       :cargo="props.robotState.cargo"
       :cargo-door-motor="props.robotState.cargoDoorMotor"
+    />
+
+    <ConnectionsTabContent
+      v-if="activeTab === 'connections'"
+      :app-connection="props.robotState.appConnection"
     />
   </div>
 </template>

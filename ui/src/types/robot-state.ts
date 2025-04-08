@@ -1,3 +1,4 @@
+import type { AppConnection } from './app-connection'
 import type { Cargo, CargoDoorMotorState } from './cargo'
 
 export interface BatteryState {
@@ -61,4 +62,5 @@ export interface RobotState {
   location: LocationState
   cargo: Cargo
   cargoDoorMotor: CargoDoorMotorState
+  appConnection: AppConnection
 }
