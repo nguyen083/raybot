@@ -90,7 +90,7 @@ func (h dashboardDataHandler) convertRobotStateToResponse(state dashboarddata.Ro
 			CloudConnection: gen.CloudConnection{
 				Connected:       state.AppConnection.CloudConnection.Connected,
 				LastConnectedAt: state.AppConnection.CloudConnection.LastConnectedAt,
-				Uptime:          h.getUptime(state.AppConnection.CloudConnection.LastConnectedAt),
+				Uptime:          h.getUptime(state.AppConnection.CloudConnection.Connected, state.AppConnection.CloudConnection.LastConnectedAt),
 				Error:           state.AppConnection.CloudConnection.Error,
 			},
 			EspSerialConnection: gen.ESPSerialConnection{
@@ -112,7 +112,10 @@ func (h dashboardDataHandler) convertRobotStateToResponse(state dashboarddata.Ro
 	}
 }
 
-func (dashboardDataHandler) getUptime(lastConnectedAt *time.Time) float32 {
+func (dashboardDataHandler) getUptime(connected bool, lastConnectedAt *time.Time) float32 {
+	if !connected {
+		return 0
+	}
 	if lastConnectedAt == nil {
 		return 0
 	}
