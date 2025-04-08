@@ -23,11 +23,11 @@ const props = defineProps<{
           <div class="flex items-center gap-4">
             <div
               class="p-3 rounded-full"
-              :class="props.cargo.isOpen ? 'bg-success/10' : 'bg-muted'"
+              :class="props.cargo.isOpen ? 'bg-green-100' : 'bg-muted'"
             >
               <Package
                 class="w-6 h-6"
-                :class="props.cargo.isOpen ? 'text-success' : 'text-muted-foreground'"
+                :class="props.cargo.isOpen ? 'text-green-600' : 'text-muted-foreground'"
               />
             </div>
             <div>
@@ -73,15 +73,15 @@ const props = defineProps<{
           <div class="flex items-center gap-4">
             <div
               class="p-3 rounded-full"
-              :class="props.cargoDoorMotor.direction === 'OPEN' ? 'bg-warning/10' : 'bg-success/10'"
+              :class="props.cargoDoorMotor.direction === 'OPEN' ? 'bg-green-100' : 'bg-yellow-100'"
             >
               <Unlock
                 v-if="props.cargoDoorMotor.direction === 'OPEN'"
-                class="w-6 h-6 text-warning"
+                class="w-6 h-6 text-green-600"
               />
               <Lock
                 v-else
-                class="w-6 h-6 text-success"
+                class="w-6 h-6 text-yellow-600"
               />
             </div>
             <div>
@@ -89,7 +89,7 @@ const props = defineProps<{
                 Cargo Door
               </p>
               <p class="text-xl font-bold">
-                {{ props.cargoDoorMotor.direction }}
+                {{ props.cargoDoorMotor.direction === 'OPEN' ? 'Open' : 'Closed' }}
               </p>
             </div>
           </div>

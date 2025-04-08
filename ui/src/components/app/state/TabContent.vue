@@ -11,12 +11,18 @@ const props = defineProps<{
   robotState: RobotState
 }>()
 
-const activeTab = ref<string>('battery')
+const route = useRoute()
+const router = useRouter()
+const tab = route.query.tab as string | undefined ?? 'battery'
+
+function handleTabChange(value: string | number) {
+  router.replace({ query: { tab: value } })
+}
 </script>
 
 <template>
   <div class="w-full">
-    <Tabs v-model="activeTab">
+    <Tabs :default-value="tab" @update:model-value="handleTabChange">
       <TabsList class="mb-4">
         <TabsTrigger value="battery">
           Battery

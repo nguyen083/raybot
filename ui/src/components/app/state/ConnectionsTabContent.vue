@@ -29,11 +29,11 @@ const props = defineProps<{
                 <div class="flex items-center gap-4 mb-4">
                   <div
                     class="p-2 rounded-full"
-                    :class="props.appConnection.cloudConnection.connected ? 'bg-success/10' : 'bg-destructive/10'"
+                    :class="props.appConnection.cloudConnection.connected ? 'bg-green-100' : 'bg-destructive/10'"
                   >
                     <Cloud
                       class="w-5 h-5"
-                      :class="props.appConnection.cloudConnection.connected ? 'text-success' : 'text-destructive'"
+                      :class="props.appConnection.cloudConnection.connected ? 'text-green-600' : 'text-destructive'"
                     />
                   </div>
                   <div>
@@ -71,11 +71,11 @@ const props = defineProps<{
                 <div class="flex items-center gap-4 mb-4">
                   <div
                     class="p-2 rounded-full"
-                    :class="props.appConnection.espSerialConnection.connected ? 'bg-success/10' : 'bg-destructive/10'"
+                    :class="props.appConnection.espSerialConnection.connected ? 'bg-green-100' : 'bg-destructive/10'"
                   >
                     <Cpu
                       class="w-5 h-5"
-                      :class="props.appConnection.espSerialConnection.connected ? 'text-success' : 'text-destructive'"
+                      :class="props.appConnection.espSerialConnection.connected ? 'text-green-600' : 'text-destructive'"
                     />
                   </div>
                   <div>
@@ -111,11 +111,11 @@ const props = defineProps<{
                 <div class="flex items-center gap-4 mb-4">
                   <div
                     class="p-2 rounded-full"
-                    :class="props.appConnection.picSerialConnection.connected ? 'bg-success/10' : 'bg-destructive/10'"
+                    :class="props.appConnection.picSerialConnection.connected ? 'bg-green-100' : 'bg-destructive/10'"
                   >
                     <Cpu
                       class="w-5 h-5"
-                      :class="props.appConnection.picSerialConnection.connected ? 'text-success' : 'text-destructive'"
+                      :class="props.appConnection.picSerialConnection.connected ? 'text-green-600' : 'text-destructive'"
                     />
                   </div>
                   <div>
@@ -149,11 +149,11 @@ const props = defineProps<{
                 <div class="flex items-center gap-4 mb-4">
                   <div
                     class="p-2 rounded-full"
-                    :class="props.appConnection.rfidUsbConnection.connected ? 'bg-success/10' : 'bg-destructive/10'"
+                    :class="props.appConnection.rfidUsbConnection.connected ? 'bg-green-100' : 'bg-destructive/10'"
                   >
                     <Usb
                       class="w-5 h-5"
-                      :class="props.appConnection.rfidUsbConnection.connected ? 'text-success' : 'text-destructive'"
+                      :class="props.appConnection.rfidUsbConnection.connected ? 'text-green-600' : 'text-destructive'"
                     />
                   </div>
                   <div>

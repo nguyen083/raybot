@@ -18,7 +18,7 @@ function handleTabChange(value: string | number) {
 
 <template>
   <PageContainer>
-    <Tabs class="w-full" :default-value="tab" @update:model-value="handleTabChange">
+    <Tabs :default-value="tab" @update:model-value="handleTabChange">
       <TabsList>
         <TabsTrigger value="log">
           Log
