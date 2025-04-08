@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'state',
         name: 'state',
-        component: () => import('@/views/state/StateView.vue'),
+        component: () => import('@/views/StateView.vue'),
         meta: { title: 'State' },
       },
       {

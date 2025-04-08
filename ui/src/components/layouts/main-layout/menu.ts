@@ -7,11 +7,11 @@ import {
 } from 'lucide-vue-next'
 
 export const menus: Item[] = [
-  // {
-  //   title: 'State',
-  //   path: '/state',
-  //   icon: ChartBarBig,
-  // },
+  {
+    title: 'State',
+    path: '/state',
+    icon: ChartBarBig,
+  },
   // {
   //   title: 'Commands',
   //   path: '/commands',
