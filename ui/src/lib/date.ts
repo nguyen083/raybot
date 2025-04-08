@@ -36,7 +36,7 @@ export function formatUptime(seconds: number): string {
   if (minutes > 0)
     parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`)
   if (remainingSeconds > 0 || parts.length === 0)
-    parts.push(`${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`)
+    parts.push(`${remainingSeconds.toFixed(0)} second${remainingSeconds !== 1 ? 's' : ''}`)
 
   return parts.join(' ')
 }
