@@ -49,8 +49,13 @@ func (s *Service) Run(ctx context.Context) (CleanupFunc, error) {
 			slog.Any("serial_cfg", s.client.cfg),
 			slog.Any("error", err),
 		)
+		events.ESPSerialDisconnectedSignal.Emit(ctx, events.ESPSerialDisconnectedEvent{
+			Error: err,
+		})
 		return func(_ context.Context) error { return nil }, nil
 	}
+
+	events.ESPSerialConnectedSignal.Emit(ctx, events.ESPSerialConnectedEvent{})
 
 	ctx, cancel := context.WithCancel(ctx)
 	go s.readLoop(ctx)
@@ -73,6 +78,9 @@ func (s *Service) readLoop(ctx context.Context) {
 			msg, err := s.client.Read()
 			if err != nil {
 				s.log.Error("failed to read from serial client", slog.Any("error", err))
+				events.ESPSerialDisconnectedSignal.Emit(ctx, events.ESPSerialDisconnectedEvent{
+					Error: err,
+				})
 				return
 			}
 			s.routeMessage(ctx, msg)

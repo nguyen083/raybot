@@ -6,6 +6,8 @@ import (
 	"log/slog"
 
 	"github.com/tbe-team/raybot/internal/config"
+	"github.com/tbe-team/raybot/internal/services/appconnection"
+	"github.com/tbe-team/raybot/internal/services/appconnection/appconnectionimpl"
 	"github.com/tbe-team/raybot/internal/services/battery"
 	"github.com/tbe-team/raybot/internal/services/battery/batteryimpl"
 	"github.com/tbe-team/raybot/internal/services/cargo"
@@ -45,6 +47,7 @@ type Application struct {
 	ConfigService         configsvc.Service
 	SystemService         system.Service
 	DashboardDataService  dashboarddata.Service
+	AppConnectionService  appconnection.Service
 }
 
 type CleanupFunc func() error
@@ -89,6 +92,7 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 	cargoRepository := cargoimpl.NewCargoRepository(db, queries)
 	locationRepository := locationimpl.NewLocationRepository(db, queries)
 	distanceSensorStateRepository := distancesensorimpl.NewDistanceSensorStateRepository()
+	appConnectionRepository := appconnectionimpl.NewRepository()
 
 	// Initialize services
 	batteryService := batteryimpl.NewService(validator, batteryStateRepository, batterySettingRepository)
@@ -107,7 +111,9 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 		driveMotorStateRepository,
 		locationRepository,
 		cargoRepository,
+		appConnectionRepository,
 	)
+	appConnectionService := appconnectionimpl.NewService(appConnectionRepository)
 
 	cleanup := func() error {
 		return db.Close()
@@ -126,5 +132,6 @@ func New(configFilePath, dbPath string) (*Application, CleanupFunc, error) {
 		ConfigService:         configService,
 		SystemService:         systemService,
 		DashboardDataService:  dashboardDataService,
+		AppConnectionService:  appConnectionService,
 	}, cleanup, nil
 }

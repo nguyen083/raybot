@@ -9,6 +9,7 @@ import (
 
 	"github.com/tbe-team/raybot/internal/config"
 	"github.com/tbe-team/raybot/internal/events"
+	"github.com/tbe-team/raybot/internal/services/appconnection"
 	"github.com/tbe-team/raybot/internal/services/battery"
 	"github.com/tbe-team/raybot/internal/services/distancesensor"
 	"github.com/tbe-team/raybot/internal/services/drivemotor"
@@ -24,6 +25,7 @@ type Service struct {
 	distanceSensorService distancesensor.Service
 	liftMotorService      liftmotor.Service
 	driveMotorService     drivemotor.Service
+	appConnectionService  appconnection.Service
 	commandStore          *commandStore
 }
 
@@ -36,6 +38,7 @@ func New(
 	distanceSensorService distancesensor.Service,
 	liftMotorService liftmotor.Service,
 	driveMotorService drivemotor.Service,
+	appConnectionService appconnection.Service,
 ) *Service {
 	s := &Service{
 		cfg:                   cfg,
@@ -45,6 +48,7 @@ func New(
 		distanceSensorService: distanceSensorService,
 		liftMotorService:      liftMotorService,
 		driveMotorService:     driveMotorService,
+		appConnectionService:  appConnectionService,
 		commandStore:          newCommandStore(),
 	}
 
@@ -63,8 +67,14 @@ func (s *Service) Run(ctx context.Context) (CleanupFunc, error) {
 			slog.Any("serial_cfg", s.client.cfg),
 			slog.Any("error", err),
 		)
+		events.PICSerialDisconnectedSignal.Emit(ctx, events.PICSerialDisconnectedEvent{
+			Error: err,
+		})
+
 		return func(_ context.Context) error { return nil }, nil
 	}
+
+	events.PICSerialConnectedSignal.Emit(ctx, events.PICSerialConnectedEvent{})
 
 	ctx, cancel := context.WithCancel(ctx)
 	go s.readLoop(ctx)
@@ -87,6 +97,9 @@ func (s *Service) readLoop(ctx context.Context) {
 			msg, err := s.client.Read()
 			if err != nil {
 				s.log.Error("failed to read from serial client", slog.Any("error", err))
+				events.PICSerialDisconnectedSignal.Emit(ctx, events.PICSerialDisconnectedEvent{
+					Error: err,
+				})
 				return
 			}
 			s.routeMessage(ctx, msg)

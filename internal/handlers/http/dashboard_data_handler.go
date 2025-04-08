@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/tbe-team/raybot/internal/handlers/http/gen"
 	"github.com/tbe-team/raybot/internal/services/dashboarddata"
@@ -27,7 +28,7 @@ func (h dashboardDataHandler) GetRobotState(ctx context.Context, _ gen.GetRobotS
 	return gen.GetRobotState200JSONResponse(h.convertRobotStateToResponse(state)), nil
 }
 
-func (dashboardDataHandler) convertRobotStateToResponse(state dashboarddata.RobotState) gen.RobotStateResponse {
+func (h dashboardDataHandler) convertRobotStateToResponse(state dashboarddata.RobotState) gen.RobotStateResponse {
 	return gen.RobotStateResponse{
 		Battery: gen.BatteryState{
 			Current:      state.Battery.Current,
@@ -85,5 +86,35 @@ func (dashboardDataHandler) convertRobotStateToResponse(state dashboarddata.Robo
 			Enabled:   state.CargoDoorMotor.Enabled,
 			UpdatedAt: state.CargoDoorMotor.UpdatedAt,
 		},
+		AppConnection: gen.AppConnection{
+			CloudConnection: gen.CloudConnection{
+				Connected:       state.AppConnection.CloudConnection.Connected,
+				LastConnectedAt: state.AppConnection.CloudConnection.LastConnectedAt,
+				Uptime:          h.getUptime(state.AppConnection.CloudConnection.LastConnectedAt),
+				Error:           state.AppConnection.CloudConnection.Error,
+			},
+			EspSerialConnection: gen.ESPSerialConnection{
+				Connected:       state.AppConnection.ESPSerialConnection.Connected,
+				LastConnectedAt: state.AppConnection.ESPSerialConnection.LastConnectedAt,
+				Error:           state.AppConnection.ESPSerialConnection.Error,
+			},
+			PicSerialConnection: gen.PICSerialConnection{
+				Connected:       state.AppConnection.PICSerialConnection.Connected,
+				LastConnectedAt: state.AppConnection.PICSerialConnection.LastConnectedAt,
+				Error:           state.AppConnection.PICSerialConnection.Error,
+			},
+			RfidUsbConnection: gen.RFIDUSBConnection{
+				Connected:       state.AppConnection.RFIDUSBConnection.Connected,
+				LastConnectedAt: state.AppConnection.RFIDUSBConnection.LastConnectedAt,
+				Error:           state.AppConnection.RFIDUSBConnection.Error,
+			},
+		},
 	}
+}
+
+func (dashboardDataHandler) getUptime(lastConnectedAt *time.Time) float32 {
+	if lastConnectedAt == nil {
+		return 0
+	}
+	return float32(time.Since(*lastConnectedAt).Seconds())
 }
