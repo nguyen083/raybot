@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useGetCommandQuery } from '@/composables/use-command'
-import { formatDate } from '@/lib/date'
+import { formatDate, formatUptime } from '@/lib/date'
 import { useIntervalFn } from '@vueuse/core'
 import { Loader2 } from 'lucide-vue-next'
 import SourceBadge from './SourceBadge.vue'
@@ -48,7 +48,7 @@ watch(isOpen, (open) => {
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent class="sm:max-w-md">
+    <SheetContent class="max-h-screen overflow-y-auto sm:max-w-md">
       <SheetHeader>
         <SheetTitle>
           Command detail
@@ -95,6 +95,14 @@ watch(isOpen, (open) => {
             </p>
             <SourceBadge :source="command.source" />
           </div>
+          <div v-if="command.completedAt && command.startedAt">
+            <p class="text-sm text-muted-foreground">
+              Duration
+            </p>
+            <p class="font-medium">
+              {{ formatUptime((new Date(command.completedAt).getTime() - new Date(command.startedAt).getTime()) / 1000) }}
+            </p>
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -126,10 +134,10 @@ watch(isOpen, (open) => {
               <span class="text-muted-foreground">Created</span>
               <span>{{ formatDate(command.createdAt) }}</span>
             </div>
-            <!-- <div class="flex justify-between text-sm">
+            <div v-if="command.startedAt" class="flex justify-between text-sm">
               <span class="text-muted-foreground">Started</span>
-              <span>{{ formatDate(props.command.runnedAt) }}</span>
-            </div> -->
+              <span>{{ formatDate(command.startedAt) }}</span>
+            </div>
             <div v-if="command.completedAt" class="flex justify-between text-sm">
               <span class="text-muted-foreground">Completed</span>
               <span>{{ formatDate(command.completedAt) }}</span>

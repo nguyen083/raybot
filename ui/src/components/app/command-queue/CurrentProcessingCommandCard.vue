@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useCurrentProcessingCommandQuery } from '@/composables/use-command'
+import { formatDate } from '@/lib/date'
 import { Clock, MoreHorizontal } from 'lucide-vue-next'
 import SourceBadge from './SourceBadge.vue'
 import StatusBadge from './StatusBadge.vue'
@@ -69,7 +70,7 @@ onUnmounted(() => {
         </div>
         <div class="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock class="w-4 h-4" />
-          <span>Started at {{ command.createdAt }}</span>
+          <span>Started at: {{ command.startedAt ? formatDate(command.startedAt) : 'N/A' }}</span>
         </div>
 
         <template v-if="command.type === 'MOVE_TO'">
