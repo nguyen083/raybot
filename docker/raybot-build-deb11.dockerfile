@@ -9,7 +9,10 @@ COPY ui ./
 RUN pnpm run build
 
 
-FROM golang:1.24 AS builder
+FROM golang:1.24-bullseye AS builder
+
+RUN apt-get update && \
+    apt-get install -y gcc-aarch64-linux-gnu
 
 WORKDIR /app
 
@@ -19,21 +22,16 @@ RUN go mod download
 COPY . .
 COPY --from=ui-builder /app/ui/dist ui/dist
 
-RUN CGO_ENABLED=1 go build -o bin/raybot cmd/raybot/main.go
+ENV CGO_ENABLED=1 \
+    GOOS=linux \
+    GOARCH=arm64 \
+    CC=aarch64-linux-gnu-gcc
+
+RUN go build -o bin/raybot cmd/raybot/main.go
 
 
-FROM debian:bookworm-slim AS prod
-
-
-RUN mkdir -p /app && \
-    groupadd -r -g 1000 raybot && \
-    useradd -r -m -u 1000 -g raybot raybot && \
-    chown -R raybot:raybot /app
+FROM alpine:3.21.3 AS prod
 
 WORKDIR /app
 
 COPY --from=builder /app/bin/raybot /app/raybot
-
-USER raybot
-
-CMD ["/app/raybot"]
