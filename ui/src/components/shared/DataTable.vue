@@ -29,6 +29,7 @@ interface Props {
   totalItems: number
   pageSizeOptions?: number[]
   sorts?: SortPrefix<TSort>[]
+  initialState?: { columnVisibility: VisibilityState }
 }
 const props = withDefaults(defineProps<Props>(), {
   pageSizeOptions: () => [10, 20, 30],
@@ -36,8 +37,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const emit = defineEmits<{
   (e: 'sorts', sorts: SortPrefix<TSort>[]): void
+  (e: 'rowClick', row: TData): void
 }>()
-const columnVisibility = ref<VisibilityState>({})
+const columnVisibility = ref<VisibilityState>(props.initialState?.columnVisibility || {})
 const page = defineModel<number>('page', { required: true })
 const pageSize = defineModel<number>('pageSize', { required: true })
 
@@ -47,6 +49,9 @@ const sorting = computed<SortingState>({
 })
 
 const table = useVueTable({
+  initialState: {
+    columnVisibility: props.initialState?.columnVisibility,
+  },
   get data() { return props.data },
   get columns() { return props.columns },
   get rowCount() { return props.totalItems },
@@ -81,6 +86,10 @@ const table = useVueTable({
     sorting.value = newState
   },
 })
+
+function handleRowClick(row: TData) {
+  emit('rowClick', row)
+}
 
 defineExpose({
   table,
@@ -122,7 +131,9 @@ defineExpose({
             <TableRow
               v-for="row in table.getRowModel().rows"
               :key="row.id"
+              class="!cursor-pointer"
               :data-state="row.getIsSelected() ? 'selected' : 'undefined'"
+              @click="handleRowClick(row.original)"
             >
               <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
