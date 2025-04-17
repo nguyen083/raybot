@@ -23,9 +23,10 @@ type service struct {
 
 	publisher eventbus.Publisher
 
-	commandRepository command.Repository
-	appStateRepo      appstate.Repository
-	dispatcher        executor.Dispatcher
+	runningCmdRepository *runningCmdRepository
+	commandRepository    command.Repository
+	appStateRepo         appstate.Repository
+	executorRouter       executor.Router
 }
 
 func NewService(
@@ -34,15 +35,16 @@ func NewService(
 	publisher eventbus.Publisher,
 	commandRepository command.Repository,
 	appStateRepo appstate.Repository,
-	dispatcher executor.Dispatcher,
+	executorRouter executor.Router,
 ) command.Service {
 	s := &service{
-		log:               log.With("service", "command"),
-		validator:         validator,
-		publisher:         publisher,
-		commandRepository: commandRepository,
-		appStateRepo:      appStateRepo,
-		dispatcher:        dispatcher,
+		log:                  log.With("service", "command"),
+		validator:            validator,
+		publisher:            publisher,
+		runningCmdRepository: newRunningCmdRepository(),
+		commandRepository:    commandRepository,
+		appStateRepo:         appStateRepo,
+		executorRouter:       executorRouter,
 	}
 
 	go s.startCheckingForExecutableCommand(context.Background())
@@ -91,6 +93,17 @@ func (s service) CreateCommand(ctx context.Context, params command.CreateCommand
 	return cmd, nil
 }
 
+func (s service) CancelCurrentProcessingCommand(_ context.Context) error {
+	runningCmd := s.runningCmdRepository.Get()
+	if runningCmd == nil {
+		return command.ErrNoCommandBeingProcessed
+	}
+
+	runningCmd.Cancel()
+
+	return nil
+}
+
 func (s service) ExecuteCreatedCommand(ctx context.Context, params command.ExecuteCreatedCommandParams) error {
 	cmd, err := s.commandRepository.GetCommandByID(ctx, params.CommandID)
 	if err != nil {
@@ -125,6 +138,14 @@ func (s service) ExecuteCreatedCommand(ctx context.Context, params command.Execu
 	s.executeCommand(ctx, cmd)
 
 	return nil
+}
+
+func (s service) DeleteCommandByID(ctx context.Context, params command.DeleteCommandByIDParams) error {
+	if err := s.validator.Validate(params); err != nil {
+		return fmt.Errorf("validate params: %w", err)
+	}
+
+	return s.commandRepository.DeleteCommandByIDAndNotProcessing(ctx, params.CommandID)
 }
 
 func (s service) startCheckingForExecutableCommand(ctx context.Context) {
@@ -183,34 +204,17 @@ func (s service) waitForHardwareComponentsInitialized(ctx context.Context) {
 }
 
 func (s service) executeCommand(ctx context.Context, cmd command.Command) {
-	if err := s.dispatcher.Dispatch(ctx, cmd); err != nil {
-		_, err = s.commandRepository.UpdateCommand(ctx, command.UpdateCommandParams{
-			ID:             cmd.ID,
-			Status:         command.StatusFailed,
-			SetStatus:      true,
-			Error:          ptr.New(err.Error()),
-			SetError:       true,
-			CompletedAt:    ptr.New(time.Now()),
-			SetCompletedAt: true,
-			UpdatedAt:      time.Now(),
-		})
-		if err != nil {
-			s.log.Error("failed to update command status to failed", slog.Any("error", err))
-		}
+	runningCmd := newRunningCommand(cmd)
+	s.runningCmdRepository.Add(runningCmd)
+	defer s.runningCmdRepository.Remove()
 
-	} else {
-		_, err := s.commandRepository.UpdateCommand(ctx, command.UpdateCommandParams{
-			ID:             cmd.ID,
-			Status:         command.StatusSucceeded,
-			SetStatus:      true,
-			CompletedAt:    ptr.New(time.Now()),
-			SetCompletedAt: true,
-			UpdatedAt:      time.Now(),
-		})
-		if err != nil {
-			s.log.Error("failed to update command status to succeeded", slog.Any("error", err))
-		}
+	// pass the context of the running command to the executor router
+	if err := s.executorRouter.Route(runningCmd.Context(), cmd); err != nil {
+		s.log.Error("failed to execute command", slog.Any("command", cmd), slog.Any("error", err))
 	}
 
-	go s.runNextExecutableCommand(ctx)
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		s.runNextExecutableCommand(ctx)
+	}()
 }

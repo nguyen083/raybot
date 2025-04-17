@@ -10,8 +10,10 @@ import (
 )
 
 var (
-	ErrCommandNotFound         = xerror.NotFound(nil, "command.notFound", "command not found")
-	ErrNoNextExecutableCommand = xerror.NotFound(nil, "command.noNextExecutable", "no next executable command")
+	ErrCommandNotFound                    = xerror.NotFound(nil, "command.notFound", "command not found")
+	ErrNoNextExecutableCommand            = xerror.NotFound(nil, "command.noNextExecutable", "no next executable command")
+	ErrNoCommandBeingProcessed            = xerror.BadRequest(nil, "command.noCommandBeingProcessed", "no command being processed")
+	ErrCommandInProcessingCanNotBeDeleted = xerror.BadRequest(nil, "command.inProcessingCanNotBeDeleted", "command in processing can not be deleted")
 )
 
 type CreateCommandParams struct {
@@ -30,7 +32,11 @@ type ListCommandsParams struct {
 }
 
 type ExecuteCreatedCommandParams struct {
-	CommandID int64
+	CommandID int64 `validate:"required,min=1"`
+}
+
+type DeleteCommandByIDParams struct {
+	CommandID int64 `validate:"required,min=1"`
 }
 
 type Service interface {
@@ -38,10 +44,11 @@ type Service interface {
 	GetCurrentProcessingCommand(ctx context.Context) (Command, error)
 	ListCommands(ctx context.Context, params ListCommandsParams) (paging.List[Command], error)
 	CreateCommand(ctx context.Context, params CreateCommandParams) (Command, error)
-	// CancelCommand(ctx context.Context, id int64) error
-	// RetryCommand(ctx context.Context, id int64) error
+	CancelCurrentProcessingCommand(ctx context.Context) error
 
 	ExecuteCreatedCommand(ctx context.Context, params ExecuteCreatedCommandParams) error
+
+	DeleteCommandByID(ctx context.Context, params DeleteCommandByIDParams) error
 }
 
 type UpdateCommandParams struct {
@@ -65,4 +72,5 @@ type Repository interface {
 	GetCommandByID(ctx context.Context, id int64) (Command, error)
 	CreateCommand(ctx context.Context, command Command) (Command, error)
 	UpdateCommand(ctx context.Context, params UpdateCommandParams) (Command, error)
+	DeleteCommandByIDAndNotProcessing(ctx context.Context, id int64) error
 }
