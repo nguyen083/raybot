@@ -39,5 +39,11 @@ const commandsAPI = {
   createCommand: <T extends CommandType>(params: CreateCommandParams<T>, axiosOpts?: AxiosRequestConfig): Promise<Command> => {
     return http.post('/commands', params, axiosOpts)
   },
+  cancelProcessingCommand: (): Promise<void> => {
+    return http.post('/commands/processing/cancel')
+  },
+  deleteCommand: (id: number): Promise<void> => {
+    return http.delete(`/commands/${id}`)
+  },
 }
 export default commandsAPI

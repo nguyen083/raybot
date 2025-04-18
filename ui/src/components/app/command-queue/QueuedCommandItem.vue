@@ -8,6 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useDeleteCommandMutation } from '@/composables/use-command'
+import { useConfirmationStore } from '@/stores/confirmation-store'
+import { RaybotError } from '@/types/error'
 import { Clock, MoreHorizontal } from 'lucide-vue-next'
 import SourceBadge from './SourceBadge.vue'
 import StatusBadge from './StatusBadge.vue'
@@ -16,10 +19,44 @@ import { getCommandIcon, getCommandName, timeSince } from './utils'
 const props = defineProps<{
   command: Command
 }>()
-
 const emit = defineEmits<{
   (e: 'viewDetails', commandId: number): void
 }>()
+
+const { openConfirmation } = useConfirmationStore()
+
+const { mutate: deleteCommand } = useDeleteCommandMutation()
+
+function handleRemoveFromQueue() {
+  openConfirmation({
+    title: 'Remove command',
+    description: 'Are you sure you want to remove this command from queue?',
+    actionLabel: 'Confirm',
+    cancelLabel: 'Cancel',
+    onAction: () => {
+      deleteCommand(props.command.id, {
+        onSuccess: () => {
+          notification.success('Command removed from queue')
+        },
+        onError: (error) => {
+          if (error instanceof RaybotError) {
+            if (error.errorCode === 'command.inProcessingCanNotBeDeleted') {
+              notification.error('Command is being processed and cannot be deleted')
+            }
+            else {
+              notification.error(error.message)
+            }
+          }
+          else {
+            notification.error(error.message)
+          }
+        },
+      })
+    },
+    onCancel: () => {
+    },
+  })
+}
 </script>
 
 <template>
@@ -43,12 +80,12 @@ const emit = defineEmits<{
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" @click.stop>
             <DropdownMenuItem @click="emit('viewDetails', props.command.id)">
-              View Details
+              View details
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit Command</DropdownMenuItem>
+            <DropdownMenuItem>Edit command</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="text-destructive" disabled>
-              Remove from Queue
+            <DropdownMenuItem class="text-red-500" @click="handleRemoveFromQueue">
+              Remove from queue
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
