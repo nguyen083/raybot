@@ -10,6 +10,26 @@ servers:
   - url: /api/v1
 security: []
 paths:
+  /health:
+    get:
+      summary: Get the health of the server
+      operationId: getHealth
+      description: Get the health of the server
+      tags:
+        - health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /error-codes:
     get:
       summary: Get all error codes
@@ -563,16 +583,16 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ErrorCodeResponse:
+    HealthResponse:
       type: object
       properties:
-        code:
+        status:
           type: string
-        message:
-          type: string
+          example: ok
+          description: The status of the health check
+          x-order: 1
       required:
-        - code
-        - message
+        - status
     FieldError:
       type: object
       properties:
@@ -607,6 +627,16 @@ components:
           items:
             $ref: '#/components/schemas/FieldError'
           x-order: 3
+      required:
+        - code
+        - message
+    ErrorCodeResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
       required:
         - code
         - message
@@ -1330,6 +1360,7 @@ components:
         - CARGO_LOWER
         - CARGO_CHECK_QR
         - SCAN_LOCATION
+        - WAIT
       description: The type of command
       x-go-type: string
     CommandStatus:
@@ -1382,6 +1413,15 @@ components:
         - qrCode
     ScanLocationInputs:
       type: object
+    WaitInputs:
+      type: object
+      properties:
+        durationMs:
+          type: integer
+          description: The duration in milliseconds
+          example: 1000
+      required:
+        - durationMs
     CommandInputs:
       oneOf:
         - $ref: '#/components/schemas/StopInputs'
@@ -1394,6 +1434,7 @@ components:
         - $ref: '#/components/schemas/CargoLowerInputs'
         - $ref: '#/components/schemas/CargoCheckQRInputs'
         - $ref: '#/components/schemas/ScanLocationInputs'
+        - $ref: '#/components/schemas/WaitInputs'
     StopOutputs:
       type: object
     MoveForwardOutputs:
@@ -1436,6 +1477,8 @@ components:
             $ref: '#/components/schemas/Location'
       required:
         - locations
+    WaitOutputs:
+      type: object
     CommandOutputs:
       oneOf:
         - $ref: '#/components/schemas/StopOutputs'
@@ -1448,6 +1491,7 @@ components:
         - $ref: '#/components/schemas/CargoLowerOutputs'
         - $ref: '#/components/schemas/CargoCheckQROutputs'
         - $ref: '#/components/schemas/ScanLocationOutputs'
+        - $ref: '#/components/schemas/WaitOutputs'
     CommandResponse:
       type: object
       properties:
