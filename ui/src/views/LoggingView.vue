@@ -19,7 +19,6 @@ const { data: logConfig, isPending } = useLogConfigQuery()
 const { mutate, isPending: isMutating } = useLogConfigMutation()
 
 function handleLogConsoleConfigUpdate(values: LogConsoleConfig) {
-  console.log('values', values)
   if (logConfig.value) {
     mutate({
       file: logConfig.value?.file,
