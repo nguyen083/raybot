@@ -2,6 +2,7 @@ import type { Item } from './Navigation.vue'
 import {
   ChartBarBig,
   Command,
+  FileText,
   LayoutList,
   Power,
   Settings2,
@@ -27,6 +28,11 @@ export const menus: Item[] = [
     title: 'Settings',
     path: '/settings',
     icon: Settings2,
+  },
+  {
+    title: 'Logging',
+    path: '/logging',
+    icon: FileText,
   },
   {
     title: 'Reboot',
