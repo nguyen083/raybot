@@ -4,14 +4,13 @@ import CloudConfigTab from '@/components/app/settings/CloudConfigTab.vue'
 import GRPCConfigTab from '@/components/app/settings/GRPCConfigTab.vue'
 import HardwareConfigTab from '@/components/app/settings/HardwareConfigTab.vue'
 import HTTPConfigTab from '@/components/app/settings/HTTPConfigTab.vue'
-import LogConfigTab from '@/components/app/settings/LogConfigTab.vue'
 import WifiConfigTab from '@/components/app/settings/WifiConfigTab.vue'
 import PageContainer from '@/components/shared/PageContainer.vue'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const route = useRoute()
 const router = useRouter()
-const tab = route.query.tab as string | undefined ?? 'log'
+const tab = route.query.tab as string | undefined ?? 'hardware'
 
 function handleTabChange(value: string | number) {
   router.replace({ query: { tab: value } })
@@ -33,9 +32,6 @@ function handleTabChange(value: string | number) {
     </div>
     <Tabs :default-value="tab" @update:model-value="handleTabChange">
       <TabsList>
-        <TabsTrigger value="log">
-          Log
-        </TabsTrigger>
         <TabsTrigger value="hardware">
           Hardware
         </TabsTrigger>
@@ -56,9 +52,6 @@ function handleTabChange(value: string | number) {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="log">
-        <LogConfigTab />
-      </TabsContent>
       <TabsContent value="hardware">
         <HardwareConfigTab />
       </TabsContent>

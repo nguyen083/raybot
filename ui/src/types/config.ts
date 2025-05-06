@@ -4,10 +4,23 @@ export interface SerialPort {
   items: { port: string }[]
 }
 
-export interface LogConfig {
+export interface LogConsoleConfig {
+  enable: boolean
   level: LogLevel
   format: LogFormat
-  addSource: boolean
+}
+
+export interface LogFileConfig {
+  enable: boolean
+  path: string
+  rotationCount: number
+  format: LogFormat
+  level: LogLevel
+}
+
+export interface LogConfig {
+  file: LogFileConfig
+  console: LogConsoleConfig
 }
 
 export interface HardwareConfig {
