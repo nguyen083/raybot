@@ -62,6 +62,17 @@ SET
 WHERE id = @id
 RETURNING *;
 
+-- name: CommandCancelByStatusQueuedAndProcessing :exec
+UPDATE commands
+SET status = 'CANCELED'
+WHERE status IN ('QUEUED', 'PROCESSING');
+
+-- name: CommandCancelByStatusQueuedAndProcessingAndCreatedByCloud :exec
+UPDATE commands
+SET status = 'CANCELED'
+WHERE status IN ('QUEUED', 'PROCESSING')
+AND source = 'CLOUD';
+
 -- name: CommandDeleteByIDAndNotProcessing :execrows
 DELETE FROM commands
 WHERE id = @id
