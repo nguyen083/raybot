@@ -134,6 +134,28 @@ func (s *Service) CancelActiveCloudCommands(ctx context.Context) error {
 	return nil
 }
 
+func (s *Service) LockProcessingCommand(ctx context.Context) error {
+	if err := s.processingLock.Lock(); err != nil {
+		return fmt.Errorf("lock processing command: %w", err)
+	}
+
+	if err := s.CancelCurrentProcessingCommand(ctx); err != nil {
+		if !errors.Is(err, command.ErrNoCommandBeingProcessed) {
+			return fmt.Errorf("cancel current processing command: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) UnlockProcessingCommand(_ context.Context) error {
+	if err := s.processingLock.Unlock(); err != nil {
+		return fmt.Errorf("unlock processing command: %w", err)
+	}
+
+	return nil
+}
+
 func (s *Service) ExecuteCreatedCommand(ctx context.Context, params command.ExecuteCreatedCommandParams) error {
 	cmd, err := s.commandRepository.GetCommandByID(ctx, params.CommandID)
 	if err != nil {
@@ -151,18 +173,6 @@ func (s *Service) ExecuteCreatedCommand(ctx context.Context, params command.Exec
 	if processingExists {
 		s.log.Info("command in PROCESSING status already exists, this command will be queued")
 		return nil
-	}
-
-	cmd, err = s.commandRepository.UpdateCommand(ctx, command.UpdateCommandParams{
-		ID:           cmd.ID,
-		Status:       command.StatusProcessing,
-		SetStatus:    true,
-		StartedAt:    ptr.New(time.Now()),
-		SetStartedAt: true,
-		UpdatedAt:    time.Now(),
-	})
-	if err != nil {
-		return fmt.Errorf("update command: %w", err)
 	}
 
 	s.executeCommand(ctx, cmd)
@@ -199,7 +209,21 @@ func (s *Service) runNextExecutableCommand(ctx context.Context) {
 		return
 	}
 
+	s.log.Info("found executable command, executing", slog.Any("command", cmd))
+	s.executeCommand(ctx, cmd)
+}
+
+func (s *Service) executeCommand(ctx context.Context, cmd command.Command) {
+	if err := s.processingLock.WaitUntilUnlocked(ctx); err != nil {
+		// if the context is canceled, we don't need to run the next executable command
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		s.log.Error("failed to wait for processing lock to be unlocked", slog.Any("error", err))
+	}
+
 	if cmd.Status == command.StatusQueued {
+		var err error
 		cmd, err = s.commandRepository.UpdateCommand(ctx, command.UpdateCommandParams{
 			ID:           cmd.ID,
 			Status:       command.StatusProcessing,
@@ -212,19 +236,6 @@ func (s *Service) runNextExecutableCommand(ctx context.Context) {
 			s.log.Error("failed to update command to PROCESSING status", slog.Any("error", err))
 			return
 		}
-	}
-
-	s.log.Info("found executable command, executing", slog.Any("command", cmd))
-	s.executeCommand(ctx, cmd)
-}
-
-func (s *Service) executeCommand(ctx context.Context, cmd command.Command) {
-	if err := s.processingLock.WaitUntilUnlocked(ctx); err != nil {
-		// if the context is canceled, we don't need to run the next executable command
-		if errors.Is(err, context.Canceled) {
-			return
-		}
-		s.log.Error("failed to wait for processing lock to be unlocked", slog.Any("error", err))
 	}
 
 	runningCmd := newRunningCommand(cmd)
