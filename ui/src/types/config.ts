@@ -64,9 +64,15 @@ export interface HTTPConfig {
   swagger: boolean
 }
 
+export interface BottomDistanceHysteresisConfig {
+  lowerThreshold: number
+  upperThreshold: number
+}
+
 export interface CargoConfig {
   liftPosition: number
   lowerPosition: number
+  bottomDistanceHysteresis: BottomDistanceHysteresisConfig
 }
 
 export interface WifiConfig {
