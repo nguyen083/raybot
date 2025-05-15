@@ -134,29 +134,12 @@ func (s *Service) CancelActiveCloudCommands(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) LockProcessingCommand(ctx context.Context) error {
-	if err := s.processingLock.Lock(); err != nil {
-		return fmt.Errorf("lock processing command: %w", err)
-	}
-
-	if err := s.CancelCurrentProcessingCommand(ctx); err != nil {
-		if !errors.Is(err, command.ErrNoCommandBeingProcessed) {
-			return fmt.Errorf("cancel current processing command: %w", err)
-		}
-	}
-
-	return nil
-}
-
-func (s *Service) UnlockProcessingCommand(_ context.Context) error {
-	if err := s.processingLock.Unlock(); err != nil {
-		return fmt.Errorf("unlock processing command: %w", err)
-	}
-
-	return nil
-}
-
 func (s *Service) ExecuteCreatedCommand(ctx context.Context, params command.ExecuteCreatedCommandParams) error {
+	if currentCmd := s.runningCmdRepository.Get(); currentCmd != nil {
+		s.log.Info("command is already being processed, this command will be queued")
+		return nil
+	}
+
 	cmd, err := s.commandRepository.GetCommandByID(ctx, params.CommandID)
 	if err != nil {
 		return fmt.Errorf("get command by id: %w", err)
@@ -166,16 +149,26 @@ func (s *Service) ExecuteCreatedCommand(ctx context.Context, params command.Exec
 		return fmt.Errorf("command is not in queued status")
 	}
 
-	processingExists, err := s.commandRepository.CommandProcessingExists(ctx)
-	if err != nil {
-		return fmt.Errorf("check if command processing exists: %w", err)
-	}
-	if processingExists {
-		s.log.Info("command in PROCESSING status already exists, this command will be queued")
-		return nil
-	}
-
 	s.executeCommand(ctx, cmd)
+
+	return nil
+}
+
+func (s *Service) CancelAllRunningCommands(ctx context.Context) error {
+	if err := s.processingLock.WithLock(func() error {
+		runningCmd := s.runningCmdRepository.Get()
+		if runningCmd != nil {
+			runningCmd.Cancel()
+		}
+
+		if err := s.commandRepository.CancelQueuedAndProcessingCommands(ctx); err != nil {
+			return fmt.Errorf("cancel queued and processing commands: %w", err)
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("with processing lock: %w", err)
+	}
 
 	return nil
 }
