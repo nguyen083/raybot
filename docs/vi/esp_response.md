@@ -95,15 +95,17 @@ Ví dụ phản hồi:
 >{"type":0,"state_type":2,"data":{"code":"abcxyz123"}}\r\n
 ```
 
-### 2.4. Trạng thái cảm biến khoảng cách dưới
+### 2.4. Trạng thái cảm biến khoảng cách 
 
-| Trường | Kiểu dữ liệu | Khóa JSON | Mô tả       |
-|--------|--------------|-----------|-------------|
-| Under  | uint8        | under     | Khoảng cách đến vật phía dưới tính bằng cm |
+| Trường   | Kiểu dữ liệu | Khóa JSON | Mô tả       |
+|----------|--------------|-----------|-------------|
+| Under    | uint8        | under     | Khoảng cách đến vật phía dưới tính bằng cm |
+| In cargo | uint8        | in_cargo  | Khoảng cách đến vật phía dưới tính bằng cm |
+
 
 Ví dụ phản hồi:
 ```
->{"type":0,"state_type":3,"data":{"under":100}}\r\n
+>{"type":0,"state_type":3,"data":{"under":100,"in_cargo":100}}\r\n
 ```
 
 ### 2.5. Trạng thái pin
