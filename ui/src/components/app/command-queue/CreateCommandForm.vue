@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { CommandType } from '@/types/command'
+import { useQueryClient } from '@tanstack/vue-query'
+import { toTypedSchema } from '@vee-validate/zod'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Clock, Loader2, MapPin, Package, QrCode, Scan, StopCircle } from 'lucide-vue-next'
+import { useForm } from 'vee-validate'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useCreateCommandMutation } from '@/composables/use-command'
+import { COMMAND_QUEUE_QUERY_KEY, CURRENT_PROCESSING_COMMAND_QUERY_KEY, useCreateCommandMutation } from '@/composables/use-command'
 import { RaybotError } from '@/types/error'
-import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Clock, Loader2, MapPin, Package, QrCode, Scan, StopCircle } from 'lucide-vue-next'
-import { useForm } from 'vee-validate'
 import { createCommandSchema } from './schemas'
 
 const { values, handleSubmit, setFieldValue, resetForm } = useForm({
@@ -19,6 +20,7 @@ const { values, handleSubmit, setFieldValue, resetForm } = useForm({
     inputs: {},
   },
 })
+const queryClient = useQueryClient()
 
 const commandType = computed(() => values.type)
 function setCommandType(type: CommandType) {
@@ -31,6 +33,8 @@ const onSubmit = handleSubmit((values) => {
   createCommand(values, {
     onSuccess: () => {
       notification.success('Command created successfully')
+      queryClient.invalidateQueries({ queryKey: [COMMAND_QUEUE_QUERY_KEY] })
+      queryClient.invalidateQueries({ queryKey: [CURRENT_PROCESSING_COMMAND_QUERY_KEY] })
     },
     onError: (error) => {
       if (error instanceof RaybotError) {
@@ -63,8 +67,7 @@ function clearForm() {
             <FormItem>
               <FormLabel>Command type</FormLabel>
               <Select
-                :disabled="isPending"
-                :model-value="commandType"
+                :disabled="isPending" :model-value="commandType"
                 @update:model-value="(val) => setCommandType(val as CommandType)"
               >
                 <FormControl>
@@ -146,6 +149,7 @@ function clearForm() {
           </FormField>
 
           <!-- Dynamic inputs based on command type -->
+
           <template v-if="commandType === 'MOVE_TO'">
             <FormField v-slot="{ componentField }" name="inputs.location">
               <FormItem>

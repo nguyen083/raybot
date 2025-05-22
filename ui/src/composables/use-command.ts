@@ -1,14 +1,18 @@
+import type { AxiosRequestConfig } from 'axios'
 import type { CommandSort } from '@/api/commands'
 import type { SortPrefix } from '@/lib/sort'
-import type { AxiosRequestConfig } from 'axios'
-import commandsAPI from '@/api/commands'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import commandsAPI from '@/api/commands'
 
+export const COMMAND_QUEUE_QUERY_KEY = 'queuedCommand'
+export const CURRENT_PROCESSING_COMMAND_QUERY_KEY = 'currentProcessingCommand'
+export const COMMAND_QUERY_KEY = 'command'
+export const COMMANDS_QUERY_KEY = 'commands'
 export function useCurrentProcessingCommandQuery(
   opts?: { axiosOpts?: Partial<AxiosRequestConfig> },
 ) {
   return useQuery({
-    queryKey: ['currentProcessingCommand'],
+    queryKey: [CURRENT_PROCESSING_COMMAND_QUERY_KEY],
     queryFn: () => commandsAPI.getCurrentProcessingCommand(opts?.axiosOpts),
   })
 }
@@ -19,7 +23,7 @@ export function useListQueuedCommandsQuery(
   opts?: { axiosOpts?: Partial<AxiosRequestConfig> },
 ) {
   return useQuery({
-    queryKey: ['queuedComand', page, pageSize],
+    queryKey: [COMMAND_QUEUE_QUERY_KEY, page, pageSize],
     queryFn: () => commandsAPI.listCommands({
       page: page.value,
       pageSize: pageSize.value,
@@ -35,7 +39,7 @@ export function useListComandsQuery(
   sorts: Ref<SortPrefix<CommandSort>[]>,
 ) {
   return useQuery({
-    queryKey: ['comands', page, pageSize, sorts],
+    queryKey: [COMMANDS_QUERY_KEY, page, pageSize, sorts],
     queryFn: () => commandsAPI.listCommands({
       page: page.value,
       pageSize: pageSize.value,
@@ -50,7 +54,7 @@ export function useGetCommandQuery(
   opts?: { axiosOpts?: Partial<AxiosRequestConfig> },
 ) {
   return useQuery({
-    queryKey: ['command', id],
+    queryKey: [COMMAND_QUERY_KEY, id],
     queryFn: () => commandsAPI.getCommand(id.value, opts?.axiosOpts),
   })
 }
@@ -71,7 +75,7 @@ export function useDeleteCommandMutation() {
   return useMutation({
     mutationFn: commandsAPI.deleteCommand,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comands'] })
+      queryClient.invalidateQueries({ queryKey: [COMMANDS_QUERY_KEY] })
     },
   })
 }
