@@ -1,3 +1,10 @@
+PKG_PREFIX=github.com/tbe-team/raybot/internal/build
+VERSION=$(shell git describe --tags --abbrev=8 --dirty --always --long)
+BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+LDFLAGS:= \
+	-X $(PKG_PREFIX).Version=$(VERSION) \
+	-X $(PKG_PREFIX).Date=$(BUILD_DATE)
+
 ########################
 # Code generation
 ########################
@@ -75,7 +82,7 @@ build:
 	CGO_ENABLED=1 \
 	GOOS=linux \
 	GOARCH=amd64 \
-	go build -o bin/raybot cmd/raybot/main.go
+	go build -ldflags "$(LDFLAGS)" -o bin/raybot cmd/raybot/main.go
 
 .PHONY: build-ui
 build-ui:
@@ -85,7 +92,12 @@ build-ui:
 build-arm64:
 	set -eux
 
-	docker build -t raybot-builder-deb11 -f docker/raybot-build-deb11.dockerfile .
+	docker build \
+		--build-arg PKG_PREFIX=$(PKG_PREFIX) \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		-t raybot-builder-deb11 \
+		-f docker/raybot-build-deb11.dockerfile .
 	docker create --name temp-build raybot-builder-deb11:latest
 	docker cp temp-build:/app/raybot ./raybot-arm64
 	docker rm temp-build
@@ -106,7 +118,7 @@ docker-run-raybot:
 #########################
 .PHONY: run
 run:
-	go run cmd/raybot/main.go -config bin/config.yml -db bin/raybot.db
+	go run -ldflags "$(LDFLAGS)" cmd/raybot/main.go -config bin/config.yml -db bin/raybot.db
 
 #########################
 # Testing
