@@ -2,7 +2,7 @@
 import type { CommandType } from '@/types/command'
 import { useQueryClient } from '@tanstack/vue-query'
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Clock, Loader2, MapPin, Package, QrCode, Scan, StopCircle } from 'lucide-vue-next'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Clock, Loader2, MapPin, Package, QrCode, Scan, Settings, StopCircle } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,7 +10,9 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { COMMAND_QUEUE_QUERY_KEY, CURRENT_PROCESSING_COMMAND_QUERY_KEY, useCreateCommandMutation } from '@/composables/use-command'
+import { useCommandConfig } from '@/composables/use-command-config'
 import { RaybotError } from '@/types/error'
+import CommandConfigSheet from './CommandConfigSheet.vue'
 import { createCommandSchema } from './schemas'
 
 const { values, handleSubmit, setFieldValue, resetForm } = useForm({
@@ -21,33 +23,56 @@ const { values, handleSubmit, setFieldValue, resetForm } = useForm({
   },
 })
 const queryClient = useQueryClient()
-
+const isConfigOpen = ref(false)
 const commandType = computed(() => values.type)
 function setCommandType(type: CommandType) {
   setFieldValue('type', type)
 }
 
 const { mutate: createCommand, isPending } = useCreateCommandMutation()
+const { commandConfig } = useCommandConfig()
+const commandInputs = computed(() => {
+  switch (commandType.value) {
+    case 'MOVE_TO':
+      return commandConfig.value.moveTo
+    case 'MOVE_FORWARD':
+      return commandConfig.value.moveForward
+    case 'MOVE_BACKWARD':
+      return commandConfig.value.moveBackward
+    case 'CARGO_OPEN':
+      return commandConfig.value.cargoOpen
+    case 'CARGO_CLOSE':
+      return commandConfig.value.cargoClose
+    case 'CARGO_LIFT':
+      return commandConfig.value.cargoLift
+    case 'CARGO_LOWER':
+      return commandConfig.value.cargoLower
+    default:
+      return {}
+  }
+})
 
 const onSubmit = handleSubmit((values) => {
-  createCommand(values, {
-    onSuccess: () => {
-      notification.success('Command created successfully')
-      queryClient.invalidateQueries({ queryKey: [COMMAND_QUEUE_QUERY_KEY] })
-      queryClient.invalidateQueries({ queryKey: [CURRENT_PROCESSING_COMMAND_QUERY_KEY] })
-    },
-    onError: (error) => {
-      if (error instanceof RaybotError) {
-        notification.error({
-          title: error.errorCode,
-          message: error.message,
-        })
-      }
-      else {
-        notification.error('Failed to create command')
-      }
-    },
-  })
+  values.inputs = { ...values.inputs, ...commandInputs.value }
+  console.log(values)
+  // createCommand(values, {
+  //   onSuccess: () => {
+  //     notification.success('Command created successfully')
+  //     queryClient.invalidateQueries({ queryKey: [COMMAND_QUEUE_QUERY_KEY] })
+  //     queryClient.invalidateQueries({ queryKey: [CURRENT_PROCESSING_COMMAND_QUERY_KEY] })
+  //   },
+  //   onError: (error) => {
+  //     if (error instanceof RaybotError) {
+  //       notification.error({
+  //         title: error.errorCode,
+  //         message: error.message,
+  //       })
+  //     }
+  //     else {
+  //       notification.error('Failed to create command')
+  //     }
+  //   },
+  // })
 })
 
 function clearForm() {
@@ -58,7 +83,12 @@ function clearForm() {
 <template>
   <Card class="sticky top-6">
     <CardHeader>
-      <CardTitle>Create command</CardTitle>
+      <CardTitle class="flex items-center justify-between">
+        Create command
+        <Button variant="outline" size="icon" @click="isConfigOpen = true">
+          <Settings class="w-4 h-4" />
+        </Button>
+      </CardTitle>
     </CardHeader>
     <form @submit.prevent="onSubmit">
       <CardContent>
@@ -217,4 +247,5 @@ function clearForm() {
       </CardFooter>
     </form>
   </Card>
+  <CommandConfigSheet v-model:is-open="isConfigOpen" />
 </template>
