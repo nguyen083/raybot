@@ -252,50 +252,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /configs/cargo:
-    get:
-      summary: Get the cargo configuration
-      operationId: getCargoConfig
-      description: Get the cargo configuration
-      tags:
-        - config
-      responses:
-        '200':
-          description: The cargo configuration
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CargoConfig'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    put:
-      summary: Update the cargo configuration
-      operationId: updateCargoConfig
-      description: Update the cargo configuration
-      tags:
-        - config
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CargoConfig'
-      responses:
-        '200':
-          description: The cargo configuration
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CargoConfig'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
   /configs/wifi:
     get:
       summary: Get the wifi configuration
@@ -843,54 +799,6 @@ components:
       required:
         - port
         - swagger
-    CargoBottomDistanceHysteresis:
-      type: object
-      properties:
-        lowerThreshold:
-          type: integer
-          example: 15
-          description: The lower threshold for the bottom distance
-          minimum: 0
-          x-order: 1
-        upperThreshold:
-          type: integer
-          example: 20
-          description: The upper threshold for the bottom distance
-          minimum: 0
-          x-order: 2
-      required:
-        - lowerThreshold
-        - upperThreshold
-    CargoConfig:
-      type: object
-      properties:
-        liftPosition:
-          type: integer
-          example: 10
-          description: The lift position for the cargo, must be less than lowerPosition
-          minimum: 0
-          x-order: 1
-        lowerPosition:
-          type: integer
-          example: 100
-          description: The lower position for the cargo
-          minimum: 0
-          x-order: 2
-        liftMotorSpeed:
-          type: integer
-          example: 100
-          description: The speed for the lift motor
-          minimum: 0
-          maximum: 100
-          x-order: 3
-        bottomDistanceHysteresis:
-          $ref: '#/components/schemas/CargoBottomDistanceHysteresis'
-          x-order: 4
-      required:
-        - liftPosition
-        - lowerPosition
-        - liftMotorSpeed
-        - bottomDistanceHysteresis
     APConfig:
       type: object
       properties:
@@ -1461,10 +1369,27 @@ components:
       x-go-type: string
     StopInputs:
       type: object
+    MotorSpeed:
+      type: integer
+      description: The speed of the motor
+      example: 100
+      minimum: 0
+      maximum: 100
+      x-go-type: uint8
     MoveForwardInputs:
       type: object
+      properties:
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+      required:
+        - motorSpeed
     MoveBackwardInputs:
       type: object
+      properties:
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+      required:
+        - motorSpeed
     MoveDirection:
       type: string
       enum:
@@ -1483,17 +1408,77 @@ components:
           $ref: '#/components/schemas/MoveDirection'
           description: The direction when moving
           x-order: 2
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+          x-order: 3
       required:
         - location
         - direction
+        - motorSpeed
     CargoOpenInputs:
       type: object
+      properties:
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+      required:
+        - motorSpeed
     CargoCloseInputs:
       type: object
+      properties:
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+      required:
+        - motorSpeed
     CargoLiftInputs:
       type: object
+      properties:
+        position:
+          type: integer
+          description: The position to lift the cargo
+          example: 100
+          x-order: 1
+          x-go-type: uint16
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+          x-order: 2
+      required:
+        - position
+        - motorSpeed
+    BottomObstacleTracking:
+      type: object
+      properties:
+        enterDistance:
+          type: integer
+          description: Start detecting obstacle when distance is below this value
+          example: 100
+          x-order: 1
+          x-go-type: uint16
+        exitDistance:
+          type: integer
+          description: Stop detecting obstacle when distance is above this value
+          example: 200
+          x-order: 2
+          x-go-type: uint16
+      required:
+        - enterDistance
+        - exitDistance
     CargoLowerInputs:
       type: object
+      properties:
+        position:
+          type: integer
+          description: The position to lower the cargo
+          example: 100
+          x-order: 1
+          x-go-type: uint16
+        motorSpeed:
+          $ref: '#/components/schemas/MotorSpeed'
+        bottomObstacleTracking:
+          $ref: '#/components/schemas/BottomObstacleTracking'
+      required:
+        - position
+        - motorSpeed
+        - bottomObstacleTracking
     CargoCheckQRInputs:
       type: object
       properties:
